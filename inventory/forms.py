@@ -1,6 +1,17 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from .models import Supply, Printer, PrinterModel, Supplier, Delivery, DeliveryItem, SupplyInstallation, User
+from .models import Supply, Printer, PrinterModel, Supplier, SupplyType, Delivery, DeliveryItem, SupplyInstallation, User
+
+
+class SupplyTypeForm(forms.ModelForm):
+    class Meta:
+        model = SupplyType
+        fields = ['name', 'description', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 
 class LoginForm(AuthenticationForm):
@@ -17,6 +28,9 @@ class LoginForm(AuthenticationForm):
 class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    is_staff = forms.BooleanField(label='Staff Status', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    is_superuser = forms.BooleanField(label='Superuser Status', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    is_active = forms.BooleanField(label='Active', required=False, initial=True, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     class Meta:
         model = User
@@ -74,7 +88,7 @@ class PrinterModelForm(forms.ModelForm):
 class PrinterForm(forms.ModelForm):
     class Meta:
         model = Printer
-        fields = ['name', 'printer_model', 'serial_number', 'custodian', 'status', 'location', 'notes']
+        fields = ['name', 'printer_model', 'serial_number', 'custodian', 'status', 'location', 'ip_address', 'image', 'notes']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'printer_model': forms.Select(attrs={'class': 'form-select', 'required': True}),
@@ -82,6 +96,8 @@ class PrinterForm(forms.ModelForm):
             'custodian': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'ip_address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 192.168.1.100'}),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
@@ -89,10 +105,11 @@ class PrinterForm(forms.ModelForm):
 class SupplyForm(forms.ModelForm):
     class Meta:
         model = Supply
-        fields = ['name', 'sku', 'description', 'printer_models', 'suppliers', 'current_stock', 'low_stock_threshold', 'max_stock_threshold', 'unit_price', 'is_active']
+        fields = ['name', 'sku', 'supply_type', 'description', 'printer_models', 'suppliers', 'current_stock', 'low_stock_threshold', 'max_stock_threshold', 'unit_price', 'image', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'sku': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'supply_type': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'printer_models': forms.SelectMultiple(attrs={'class': 'form-select', 'required': True}),
             'suppliers': forms.SelectMultiple(attrs={'class': 'form-select', 'required': True}),
@@ -100,17 +117,35 @@ class SupplyForm(forms.ModelForm):
             'low_stock_threshold': forms.NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
             'max_stock_threshold': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
             'unit_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            from inventory.models import normalize_name
+            name_slug = normalize_name(name)
+            existing = Supply.objects.filter(name_slug=name_slug, is_active=True)
+            if self.instance and self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                existing_supply = existing.first()
+                raise forms.ValidationError(
+                    f"A supply with a similar name '{existing_supply.name}' already exists. "
+                    f"Please use a different name."
+                )
+        return name
 
 
 class DeliveryForm(forms.ModelForm):
     class Meta:
         model = Delivery
-        fields = ['supplier', 'delivery_date', 'notes']
+        fields = ['supplier', 'delivery_date', 'delivery_note', 'notes']
         widgets = {
             'supplier': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'delivery_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': True}),
+            'delivery_note': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 

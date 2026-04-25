@@ -6,36 +6,30 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>Deliveries</span>
+        {% if user.role != 'staff' %}
         <a href="{% url 'delivery_create' %}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Add Delivery
         </a>
+        {% endif %}
     </div>
     <div class="card-body">
         {% if deliveries %}
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Supplier</th>
                     <th>Date</th>
+                    <th>Supplier</th>
                     <th>Items</th>
                     <th>Created By</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for delivery in deliveries %}
                 <tr>
-                    <td>#{{ delivery.id }}</td>
+                    <td><a href="{% url 'delivery_detail' delivery.pk %}" class="text-decoration-none">{{ delivery.delivery_date }}</a></td>
                     <td>{{ delivery.supplier.name }}</td>
-                    <td>{{ delivery.delivery_date }}</td>
                     <td>{{ delivery.total_items }}</td>
                     <td>{{ delivery.created_by.username }}</td>
-                    <td>
-                        <a href="{% url 'delivery_detail' delivery.pk %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -46,7 +46,7 @@
                 <i class="bi bi-person-fill field-icon"></i>
                 <input type="text" name="username" class="form-control"
                        placeholder="Username" autofocus autocomplete="username"
-                       value="{{ form.username.value|default:'' }}">
+                       value="{{ remembered_username|default:'' }}">
             </div>
 
             <div class="login-field-wrap">
@@ -57,7 +57,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-4" style="margin-top:-6px;">
                 <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
-                    <input type="checkbox" class="form-check-input" style="margin:0;">
+                    <input type="checkbox" name="remember_me" class="form-check-input" style="margin:0;">
                     <span style="color:var(--text-2); font-size:.85rem;">Remember me</span>
                 </label>
                 <a href="#" style="font-size:.85rem; font-weight:600;">Forgot password?</a>

@@ -42,7 +42,7 @@
             <tbody>
                 {% for installation in installations %}
                 <tr>
-                    <td>{{ installation.supply.name }}</td>
+                    <td><a href="{% url 'supply_detail' installation.supply.pk %}" style="color: var(--primary); text-decoration: none;">{{ installation.supply.name }}</a></td>
                     <td>
                         <a href="{% url 'printer_detail' installation.printer.pk %}" style="color: var(--primary); text-decoration: none;">{{ installation.printer.name }}</a>
                     </td>

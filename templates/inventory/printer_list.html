@@ -8,9 +8,11 @@
         <h2>Printers</h2>
         <p>Track hardware devices and custodian assignments</p>
     </div>
+    {% if user.role != 'staff' %}
     <a href="{% url 'printer_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> New Printer
     </a>
+    {% endif %}
 </div>
 
 <form method="get" class="filter-bar">
@@ -44,11 +46,13 @@
     <table class="table">
         <thead>
             <tr>
+                <th style="padding-left:24px;">Image</th>
                 <th style="padding-left:24px;">Printer</th>
                 <th>Model</th>
                 <th>Serial No.</th>
                 <th>Custodian</th>
                 <th>Location</th>
+                <th>IP Address</th>
                 <th>Status</th>
                 <th class="text-end" style="padding-right:24px;">Actions</th>
             </tr>
@@ -56,6 +60,19 @@
         <tbody>
             {% for printer in printers %}
             <tr>
+                <td style="padding-left:24px; width: 60px;">
+                    {% if printer.image %}
+                    <a href="{% url 'printer_detail' printer.pk %}">
+                        <img src="{{ printer.image.url }}" alt="{{ printer.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
+                    </a>
+                    {% else %}
+                    <a href="{% url 'printer_detail' printer.pk %}">
+                        <div style="width: 40px; height: 40px; background: var(--surface-2); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-printer-fill" style="color: var(--text-3);"></i>
+                        </div>
+                    </a>
+                    {% endif %}
+                </td>
                 <td style="padding-left:24px; font-weight:600;">
                     <a href="{% url 'printer_detail' printer.pk %}" style="color: var(--text-1); text-decoration: none;">{{ printer.name }}</a>
                 </td>
@@ -64,17 +81,28 @@
                 <td style="color:var(--text-2);">{{ printer.custodian.get_full_name|default:printer.custodian.username|default:"—" }}</td>
                 <td style="color:var(--text-2);">{{ printer.location }}</td>
                 <td>
+                    {% if printer.ip_address %}
+                    <a href="http://{{ printer.ip_address }}" target="_blank" style="color: var(--primary); text-decoration: none;" title="Open printer management console">
+                        {{ printer.ip_address }} <i class="bi bi-box-arrow-up-right" style="font-size: 0.7em;"></i>
+                    </a>
+                    {% else %}
+                    <span style="color:var(--text-3);">—</span>
+                    {% endif %}
+                </td>
+                <td>
                     {% if printer.status == 'active' %}<span class="badge badge-success">Active</span>
                     {% elif printer.status == 'maintenance' %}<span class="badge badge-warning">Maintenance</span>
                     {% else %}<span class="badge badge-muted">Retired</span>{% endif %}
                 </td>
                 <td style="text-align:right; padding-right:24px;">
+                    {% if user.role != 'staff' %}
                     <a href="{% url 'printer_update' printer.pk %}" class="btn btn-ghost btn-sm" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a href="{% url 'printer_delete' printer.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
                         <i class="bi bi-trash"></i>
                     </a>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}

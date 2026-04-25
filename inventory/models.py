@@ -2,6 +2,23 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+import re
+
+
+def normalize_name(name):
+    if not name:
+        return ''
+    normalized = name.lower()
+    # Extract all letter sequences and number sequences
+    letters = re.findall(r'[a-z]+', normalized)
+    numbers = re.findall(r'[0-9]+', normalized)
+    # Sort letters alphabetically
+    letters.sort()
+    # Sort numbers numerically (by integer value)
+    numbers.sort(key=int)
+    # Letters come first, then numbers
+    letters.extend(numbers)
+    return ''.join(letters)
 
 
 class User(AbstractUser):
@@ -39,6 +56,22 @@ class Supplier(models.Model):
         return self.name
 
 
+class SupplyType(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Supply Type'
+        verbose_name_plural = 'Supply Types'
+
+    def __str__(self):
+        return self.name
+
+
 class PrinterModel(models.Model):
     name = models.CharField(max_length=200)
     manufacturer = models.CharField(max_length=200)
@@ -63,6 +96,8 @@ class Printer(models.Model):
     custodian = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     location = models.CharField(max_length=200)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    image = models.ImageField(upload_to='printers/', blank=True, null=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -87,7 +122,9 @@ class Supply(models.Model):
     ]
 
     name = models.CharField(max_length=200)
+    name_slug = models.CharField(max_length=200, null=True, blank=True)
     sku = models.CharField(max_length=100, unique=True)
+    supply_type = models.ForeignKey(SupplyType, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplies')
     description = models.TextField(blank=True)
     printer_models = models.ManyToManyField(PrinterModel, related_name='supplies')
     suppliers = models.ManyToManyField(Supplier, blank=True, related_name='supplies')
@@ -95,6 +132,7 @@ class Supply(models.Model):
     low_stock_threshold = models.IntegerField(default=10, validators=[MinValueValidator(0)])
     max_stock_threshold = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal('0.01'))])
+    image = models.ImageField(upload_to='supplies/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -116,12 +154,15 @@ class Supply(models.Model):
         return 'normal'
 
     def save(self, *args, **kwargs):
+        if self.name and not self.name_slug:
+            self.name_slug = normalize_name(self.name)
         super().save(*args, **kwargs)
 
 
 class Delivery(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
     delivery_date = models.DateField()
+    delivery_note = models.FileField(upload_to='delivery_notes/', blank=True, null=True)
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

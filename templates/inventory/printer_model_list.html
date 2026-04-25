@@ -7,9 +7,11 @@
     <div>
         <p class="text-muted m-0">Manage hardware compatibility groups</p>
     </div>
+    {% if user.role != 'staff' %}
     <a href="{% url 'printer_model_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-lg me-2"></i>New Model
     </a>
+    {% endif %}
 </div>
 
 <div class="card">
@@ -28,14 +30,16 @@
                     {% for pm in printer_models %}
                     <tr>
                         <td><span class="fw-bold">{{ pm.manufacturer }}</span></td>
-                        <td>{{ pm.name }}</td>
+                        <td><a href="{% url 'printer_model_detail' pm.pk %}" style="color: var(--text-1); text-decoration: none;">{{ pm.name }}</a></td>
                         <td>
                             <span class="badge badge-neon">{{ pm.supplies.count }} Supplies</span>
                         </td>
                         <td class="text-end">
+                            {% if user.role != 'staff' %}
                             <a href="{% url 'printer_model_update' pm.pk %}" class="btn btn-sm btn-light">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

@@ -13,7 +13,7 @@
     </a>
 </div>
 
-<form method="post" novalidate>
+<form method="post" novalidate enctype="multipart/form-data">
     {% csrf_token %}
 
     <!-- Section 1: Basic Info -->
@@ -73,6 +73,22 @@
                     {{ form.location }}
                     <div class="form-text">e.g. Floor 3, Room 302, Reception Desk</div>
                     {% if form.location.errors %}<div class="invalid-feedback">{{ form.location.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.ip_address.id_for_label }}">Printer IP Address <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.ip_address }}
+                    <div class="form-text">The printer's network IP address (e.g. 192.168.1.100).</div>
+                    {% if form.ip_address.errors %}<div class="invalid-feedback">{{ form.ip_address.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.image.id_for_label }}">Image <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.image }}
+                    <div class="form-text">Upload a photo of the printer.</div>
+                    {% if form.image.errors %}<div class="invalid-feedback">{{ form.image.errors.0 }}</div>{% endif %}
                 </div>
             </div>
         </div>
