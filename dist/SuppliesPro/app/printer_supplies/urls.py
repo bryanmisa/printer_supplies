@@ -22,6 +22,8 @@ urlpatterns = [
     path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
     path('users/<int:pk>/delete/', views.user_delete, name='user_delete'),
     path('users/<int:pk>/toggle/', views.user_toggle_active, name='user_toggle'),
+    path('users/<int:pk>/reset-password/', views.user_reset_password, name='user_reset_password'),
+    path('users/<int:pk>/delete/', views.user_delete, name='user_delete'),
 
     path('supplies/', views.SupplyListView.as_view(), name='supply_list'),
     path('supplies/create/', views.SupplyCreateView.as_view(), name='supply_create'),

@@ -125,11 +125,9 @@
                         <h5>No printers registered</h5>
                         <p>Add your first printer to begin tracking installations.</p>
                         {% if user.role != 'staff' %}
-                        {% if user.role != 'staff' %}
                         <a href="{% url 'printer_create' %}" class="btn btn-primary mt-2">
                             <i class="bi bi-plus-lg"></i> Add Printer
                         </a>
-                        {% endif %}
                         {% endif %}
                     </div>
                 </td>
