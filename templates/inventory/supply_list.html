@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Supplies – SuppliesPro{% endblock %}
+{% block page_title %}Supplies{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Supplies</h2>
+        <p>Manage consumable inventory and stock levels</p>
+    </div>
+    <a href="{% url 'supply_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> New Supply
+    </a>
+</div>
+
+<form method="get" class="filter-bar">
+        <div class="filter-group" style="flex:1;">
+            <label>Search</label>
+            <input type="text" name="q" class="form-control" placeholder="Name or SKU…" value="{{ request.GET.q }}">
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status" class="form-select no-select2">
+                <option value="">All</option>
+                <option value="out_of_stock" {% if request.GET.status == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                <option value="low_stock"    {% if request.GET.status == 'low_stock'    %}selected{% endif %}>Low Stock</option>
+                <option value="normal"       {% if request.GET.status == 'normal'       %}selected{% endif %}>Normal</option>
+                <option value="overstock"    {% if request.GET.status == 'overstock'    %}selected{% endif %}>Overstock</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Printer Model</label>
+            <select name="printer_model" class="form-select no-select2">
+                <option value="">All Models</option>
+                {% for pm in printer_models %}
+                <option value="{{ pm.id }}" {% if request.GET.printer_model == pm.id|stringformat:"i" %}selected{% endif %}>{{ pm }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+<!-- Table -->
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left:24px;">Supply</th>
+                <th>SKU</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th class="text-end" style="padding-right:24px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supply in supplies %}
+            <tr>
+                <td style="padding-left:24px;">
+                    <div style="font-weight:600; color:var(--text-1);">{{ supply.name }}</div>
+                    <div style="font-size:.75rem; color:var(--text-3);">Updated {{ supply.updated_at|date:"M d, Y" }}</div>
+                </td>
+                <td><code>{{ supply.sku }}</code></td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-weight:700; font-size:1rem;">{{ supply.current_stock }}</span>
+                        <div style="flex:1; max-width:80px;">
+                            <div class="progress" style="height:5px; border-radius:99px;">
+                                <div class="progress-bar {% if supply.status == 'out_of_stock' %}bg-danger{% elif supply.status == 'low_stock' %}bg-warning{% else %}bg-success{% endif %}"
+                                     style="width:{% if supply.current_stock > 100 %}100{% else %}{{ supply.current_stock }}{% endif %}%;">
+                                </div>
+                            </div>
+                            <div style="font-size:.7rem; color:var(--text-3); margin-top:2px;">min {{ supply.low_stock_threshold }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% if supply.status == 'out_of_stock' %}<span class="badge badge-danger">Out of Stock</span>
+                    {% elif supply.status == 'low_stock'  %}<span class="badge badge-warning">Low Stock</span>
+                    {% elif supply.status == 'overstock'  %}<span class="badge badge-primary">Overstock</span>
+                    {% else %}<span class="badge badge-success">Normal</span>{% endif %}
+                </td>
+                <td style="text-align:right; padding-right:24px;">
+                    <a href="{% url 'supply_update' supply.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'supply_delete' supply.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-archive"></i></div>
+                        <h5>No supplies found</h5>
+                        <p>Try adjusting your filters or add the first supply item.</p>
+                        <a href="{% url 'supply_create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Add Supply
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

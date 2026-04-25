@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block title %}{{ printer.name }} - SuppliesPro{% endblock %}
+{% block page_title %}{{ printer.name }}{% endblock %}
+
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<script>
+    window.onload = function () {
+        var modal = new bootstrap.Modal(document.getElementById('alertModal'));
+        document.getElementById('alertModalMessage').textContent = '{{ message }}';
+        modal.show();
+    };
+</script>
+{% endfor %}
+{% endif %}
+
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        {% if printer.image %}
+        <img src="{{ printer.image.url }}" alt="{{ printer.name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;">
+        {% else %}
+        <div style="width: 80px; height: 80px; background: var(--surface-2); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-printer-fill" style="font-size: 2rem; color: var(--text-3);"></i>
+        </div>
+        {% endif %}
+        <div>
+            <h2>{{ printer.name }}
+                {% if printer.status == 'active' %}
+                <span class="badge" style="background: rgba(16,185,129,.15); color: var(--success); border: 1px solid rgba(16,185,129,.3);">
+                    <i class="bi bi-toggle-on"></i> Active
+                </span>
+                {% else %}
+                <span class="badge" style="background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3);">
+                    <i class="bi bi-toggle-off"></i> Inactive
+                </span>
+                {% endif %}
+            </h2>
+            <p>{{ printer.printer_model.manufacturer }} {{ printer.printer_model.name }} - {{ printer.serial_number }}</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'printer_list' %}" class="btn btn-ghost">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        {% if user.role != 'staff' %}
+        <a href="{% url 'printer_update' printer.pk %}" class="btn btn-ghost">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon info">
+                <i class="bi bi-printer-fill"></i>
+            </div>
+            <div class="stat-info">
+                <p>Model</p>
+                <h3>{{ printer.printer_model.manufacturer }} {{ printer.printer_model.name }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon primary">
+                <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div class="stat-info">
+                <p>Location</p>
+                <h3>{{ printer.location }}</h3>
+            </div>
+        </div>
+    </div>
+    {% if printer.ip_address %}
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon primary">
+                <i class="bi bi-globe2"></i>
+            </div>
+            <div class="stat-info">
+                <p>IP Address</p>
+                <h3><a href="http://{{ printer.ip_address }}" target="_blank" style="color: var(--primary); text-decoration: none;">{{ printer.ip_address }} <i class="bi bi-box-arrow-up-right" style="font-size: 0.7em;"></i></a></h3>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if printer.custodian %}
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon info">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="stat-info">
+                <p>Custodian</p>
+                <h3>{{ printer.custodian.username }}</h3>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-plus-circle-fill me-2"></i> Install Supplies
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'printer_install' printer.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="supplySelect" class="form-label" style="color: var(--text-1); font-weight: 600;">Select
+                    Supplies</label>
+                <select name="supplies" id="supplySelect" class="form-select no-select2" multiple required>
+                    {% for supply in compatible_supplies %}
+                    <option value="{{ supply.pk }}" data-name="{{ supply.name }}" data-sku="{{ supply.sku }}"
+                        data-stock="{{ supply.current_stock }}">{{ supply.name }} ({{ supply.sku }})</option>
+                    {% empty %}
+                    <option value="" disabled>No compatible supplies in stock</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes (optional)</label>
+                <textarea name="notes" id="notes" class="form-control" rows="2"
+                    placeholder="Add any notes about this installation..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" {% if not compatible_supplies %}disabled{% endif %}>
+                <i class="bi bi-plug-fill"></i> Install Selected
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if current_installations %}
+<div class="card mt-4">
+    <div class="card-header" style="background: rgba(16,185,129,.15); border-color: rgba(16,185,129,.3);">
+        <i class="bi bi-plug-fill me-2"></i> Currently Installed Supplies
+    </div>
+    <div class="card-body">
+        {% for installation in current_installations %}
+        <div
+            class="d-flex justify-content-between align-items-center {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+            <div>
+                <h4 style="color: var(--text-1);"><a href="{% url 'supply_detail' installation.supply.pk %}" class="text-decoration-none">{{ installation.supply.name }}</a></h4>
+                <p style="color: var(--text-2); margin: 0;">SKU: {{ installation.supply.sku }}</p>
+                <p style="color: var(--text-3); margin: 0; font-size: .8rem;">Installed {{
+                    installation.installed_at|date:"M d, Y" }} by {{ installation.installed_by.username }}</p>
+            </div>
+            <form method="post" action="{% url 'installation_dispose' installation.pk %}">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <input type="text" name="notes" class="form-control form-control-sm"
+                        placeholder="Disposal reason (optional)">
+                </div>
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="bi bi-plug"></i> Dispose
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i> Installation History
+    </div>
+    <div class="card-body p-0">
+        {% if installations %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Supply</th>
+                    <th>SKU</th>
+                    <th>Installed By</th>
+                    <th>Installed At</th>
+                    <th>Status</th>
+                    <th>Disposed At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for installation in installations %}
+                <tr>
+                    <td>
+                        <span style="font-weight: 600;"><a href="{% url 'supply_detail' installation.supply.pk %}" class="text-decoration-none">{{ installation.supply.name }}</a></span>
+                    </td>
+                    <td><code>{{ installation.supply.sku }}</code></td>
+                    <td>{{ installation.installed_by.username }}</td>
+                    <td>{{ installation.installed_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        {% if installation.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-muted">Disposed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if installation.disposed_at %}
+                        {{ installation.disposed_at|date:"M d, Y H:i" }}
+                        {% else %}
+                        <span style="color: var(--text-3);">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-clock-history"></i>
+            <h5>No installation history</h5>
+            <p>This printer has no supply installations recorded.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="alertModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-info-circle-fill me-2" style="color: var(--primary);"></i>Notice
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="alertModalMessage" style="color: var(--text-1); margin: 0;"></p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('#supplySelect').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: '🔍 Search by name or SKU...',
+            closeOnSelect: false,
+            templateResult: function (state) {
+                if (!state.id) {
+                    return state.text;
+                }
+                var $el = $(state.element);
+                var name = $el.data('name');
+                var sku = $el.data('sku');
+                var stock = parseInt($el.data('stock') || 0);
+
+                var stockBadge = stock > 0
+                    ? `<span class="badge" style="background: rgba(16,185,129,.15); color: var(--success); border: 1px solid rgba(16,185,129,.3);">Stock: ${stock}</span>`
+                    : `<span class="badge" style="background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3);">Out of Stock</span>`;
+
+                return $(`
+                <div class="d-flex justify-content-between align-items-center py-2 px-1" style="border-bottom: 1px solid var(--border);">
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold" style="color: var(--text-1); font-size: 0.95rem;">${name}</span>
+                        <span style="color: var(--text-3); font-size: 0.8rem;"><i class="bi bi-upc-scan me-1"></i>${sku}</span>
+                    </div>
+                    <div>${stockBadge}</div>
+                </div>
+            `);
+            },
+            templateSelection: function (state) {
+                if (!state.id) return state.text;
+                return $(`<span class="fw-medium"><i class="bi bi-box-seam me-1"></i> ${$(state.element).data('name')}</span>`);
+            }
+        });
+    });
+</script>
+{% endblock %}

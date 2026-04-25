@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit Model{% else %}New Printer Model{% endif %} – SuppliesPro{% endblock %}
+{% block page_title %}{% if object %}Edit Model{% else %}New Printer Model{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{% if object %}{{ object }}{% else %}New Printer Model{% endif %}</h2>
+        <p>Define a hardware model for compatibility grouping</p>
+    </div>
+    <a href="{% url 'printer_model_list' %}" class="btn btn-ghost">
+        <i class="bi bi-arrow-left"></i> Back to Models
+    </a>
+</div>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-cpu-fill"></i> Model Information
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.manufacturer.id_for_label }}">Manufacturer <span style="color:var(--danger);">*</span></label>
+                    {{ form.manufacturer }}
+                    {% if form.manufacturer.errors %}<div class="invalid-feedback">{{ form.manufacturer.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.name.id_for_label }}">Model Name <span style="color:var(--danger);">*</span></label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="field-group">
+                    <label for="{{ form.description.id_for_label }}">Description <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.description }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 justify-content-between">
+        <a href="{% url 'printer_model_list' %}" class="btn btn-ghost">
+            <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-lg"></i>
+            {% if object %}Save Changes{% else %}Create Model{% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}

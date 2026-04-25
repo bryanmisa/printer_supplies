@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Inventory Report - Printer Supplies{% endblock %}
+{% block page_title %}Inventory Report{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon primary">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_supplies }}</h3>
+                <p>Total Supplies</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon danger">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ out_of_stock_count }}</h3>
+                <p>Out of Stock</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon warning">
+                <i class="bi bi-exclamation-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ low_stock_count }}</h3>
+                <p>Low Stock</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon success">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ normal_count }}</h3>
+                <p>Normal</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Out of Stock ({{ out_of_stock_count }})</div>
+    <div class="card-body">
+        {% if out_of_stock %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Current Stock</th>
+                    <th>Threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supply in out_of_stock %}
+                <tr>
+                    <td>{{ supply.name }}</td>
+                    <td>{{ supply.sku }}</td>
+                    <td><span class="badge badge-danger">{{ supply.current_stock }}</span></td>
+                    <td>{{ supply.low_stock_threshold }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No supplies out of stock.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Low Stock ({{ low_stock_count }})</div>
+    <div class="card-body">
+        {% if low_stock %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Current Stock</th>
+                    <th>Threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supply in low_stock %}
+                <tr>
+                    <td>{{ supply.name }}</td>
+                    <td>{{ supply.sku }}</td>
+                    <td><span class="badge badge-warning">{{ supply.current_stock }}</span></td>
+                    <td>{{ supply.low_stock_threshold }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No supplies at low stock.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Normal ({{ normal_count }})</div>
+    <div class="card-body">
+        {% if normal %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Current Stock</th>
+                    <th>Threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supply in normal %}
+                <tr>
+                    <td>{{ supply.name }}</td>
+                    <td>{{ supply.sku }}</td>
+                    <td><span class="badge badge-success">{{ supply.current_stock }}</span></td>
+                    <td>{{ supply.low_stock_threshold }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No supplies at normal level.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Overstock ({{ overstock_count }})</div>
+    <div class="card-body">
+        {% if overstock %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Current Stock</th>
+                    <th>Max Threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supply in overstock %}
+                <tr>
+                    <td>{{ supply.name }}</td>
+                    <td>{{ supply.sku }}</td>
+                    <td><span class="badge badge-primary">{{ supply.current_stock }}</span></td>
+                    <td>{{ supply.max_stock_threshold|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No supplies overstocked.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

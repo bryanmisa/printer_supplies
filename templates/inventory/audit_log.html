@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Audit Log - Printer Supplies{% endblock %}
+{% block page_title %}Audit Log{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Audit Log</div>
+    <div class="card-body">
+        <form method="get" class="filter-bar">
+            <div class="filter-group">
+                <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ request.GET.q }}">
+            </div>
+            <div class="filter-group">
+                <label>Action</label>
+                <select name="action" class="form-select">
+                    <option value="">All Actions</option>
+                    {% for value, label in actions %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>User</label>
+                <select name="user" class="form-select">
+                    <option value="">All Users</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Object</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp|date:"M d, Y H:i" }}</td>
+                    <td>{{ log.user.username|default:"-" }}</td>
+                    <td>
+                        {% if log.action == 'create' %}
+                        <span class="badge badge-success">{{ log.get_action_display }}</span>
+                        {% elif log.action == 'update' %}
+                        <span class="badge badge-primary">{{ log.get_action_display }}</span>
+                        {% elif log.action == 'delete' %}
+                        <span class="badge badge-danger">{{ log.get_action_display }}</span>
+                        {% elif log.action == 'install' %}
+                        <span class="badge badge-success">{{ log.get_action_display }}</span>
+                        {% elif log.action == 'dispose' %}
+                        <span class="badge badge-warning">{{ log.get_action_display }}</span>
+                        {% elif log.action == 'delivery' %}
+                        <span class="badge badge-info">{{ log.get_action_display }}</span>
+                        {% else %}
+                        <span class="badge badge-secondary">{{ log.get_action_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.object_repr }}</td>
+                    <td><small>{{ log.changes }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if logs.has_other_pages %}
+        <div class="pagination">
+            {% if logs.has_previous %}
+            <a href="?page={{ logs.previous_page_number }}">&laquo;</a>
+            {% endif %}
+            <span>Page {{ logs.number }} of {{ logs.paginator.num_pages }}</span>
+            {% if logs.has_next %}
+            <a href="?page={{ logs.next_page_number }}">&raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

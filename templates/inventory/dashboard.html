@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – SuppliesPro{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stat Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-archive-fill"></i></div>
+            <div>
+                <div class="stat-value">{{ total_supplies }}</div>
+                <div class="stat-label">Total Supplies</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-printer-fill"></i></div>
+            <div>
+                <div class="stat-value">{{ total_printers }}</div>
+                <div class="stat-label">Active Printers</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon danger"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div>
+                <div class="stat-value">{{ out_of_stock }}</div>
+                <div class="stat-label">Out of Stock</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-exclamation-circle-fill"></i></div>
+            <div>
+                <div class="stat-value">{{ low_stock }}</div>
+                <div class="stat-label">Low Stock</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts + Chart -->
+<div class="row g-4 mb-4">
+
+    <!-- Out of Stock -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-x-octagon-fill" style="color:#fb7185;"></i>
+                Out of Stock Alerts
+                {% if out_of_stock > 0 %}
+                <span class="badge-danger badge ms-auto">{{ out_of_stock }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if out_of_stock_alerts %}
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Supply</th>
+                            <th>SKU</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in out_of_stock_alerts %}
+                        <tr>
+                            <td class="fw-600">{{ s.name }}</td>
+                            <td><code>{{ s.sku }}</code></td>
+                            <td><span class="badge badge-danger">Out of Stock</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-check-circle"></i></div>
+                    <h5>All Clear</h5>
+                    <p>No supplies are out of stock</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-circle-fill" style="color:#fbbf24;"></i>
+                Low Stock Alerts
+                {% if low_stock > 0 %}
+                <span class="badge-warning badge ms-auto">{{ low_stock }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if low_stock_alerts %}
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Supply</th>
+                            <th>SKU</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in low_stock_alerts %}
+                        <tr>
+                            <td class="fw-600">{{ s.name }}</td>
+                            <td><code>{{ s.sku }}</code></td>
+                            <td><span class="badge badge-warning">{{ s.current_stock }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-check-circle"></i></div>
+                    <h5>Levels OK</h5>
+                    <p>All supplies are above threshold</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Consumption Chart -->
+<div class="card">
+    <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-graph-up-arrow" style="color:var(--primary);"></i>
+        30-Day Consumption Trend
+    </div>
+    <div class="card-body">
+        <canvas id="consumptionChart" style="height:260px;"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+new Chart(document.getElementById('consumptionChart'), {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Consumed',
+            data: {{ chart_data|safe }},
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.08)',
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointBackgroundColor: '#6366f1',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
+    }
+});
+</script>
+{% endblock %}

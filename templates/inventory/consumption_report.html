@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Consumption Report - Printer Supplies{% endblock %}
+{% block page_title %}Consumption Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-graph-up me-2"></i> Consumption Report
+        <form method="get" class="filter-bar" style="margin-bottom:0;">
+            <div class="filter-group">
+                <select name="months" class="form-select">
+                    <option value="3" {% if months == 3 %}selected{% endif %}>Last 3 Months</option>
+                    <option value="6" {% if months == 6 %}selected{% endif %}>Last 6 Months</option>
+                    <option value="12" {% if months == 12 %}selected{% endif %}>Last 12 Months</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="custodian" class="form-select">
+                    <option value="">All Custodians</option>
+                    {% for user in custodians %}
+                    <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="chart-container">
+            <canvas id="consumptionChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('consumptionChart');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Supplies Consumed',
+                data: {{ chart_data|safe }},
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

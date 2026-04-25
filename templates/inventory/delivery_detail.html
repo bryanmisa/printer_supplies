@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Delivery #{{ delivery.id }}{% endblock %}
+{% block page_title %}Delivery #{{ delivery.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Delivery Details</div>
+    <div class="card-body">
+        <p><strong>Supplier:</strong> {{ delivery.supplier.name }}</p>
+        <p><strong>Date:</strong> {{ delivery.delivery_date }}</p>
+        <p><strong>Created By:</strong> {{ delivery.created_by.username }}</p>
+        <p><strong>Notes:</strong> {{ delivery.notes|default:"-" }}</p>
+        <hr>
+        <h5>Items</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Supply</th>
+                    <th>SKU</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in delivery.items.all %}
+                <tr>
+                    <td>{{ item.supply.name }}</td>
+                    <td>{{ item.supply.sku }}</td>
+                    <td>{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'delivery_list' %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}

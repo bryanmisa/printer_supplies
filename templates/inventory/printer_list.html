@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Printers – SuppliesPro{% endblock %}
+{% block page_title %}Printers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Printers</h2>
+        <p>Track hardware devices and custodian assignments</p>
+    </div>
+    <a href="{% url 'printer_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> New Printer
+    </a>
+</div>
+
+<form method="get" class="filter-bar">
+        <div class="filter-group" style="flex:1;">
+            <label>Search</label>
+            <input type="text" name="q" class="form-control" placeholder="Name or serial…" value="{{ request.GET.q }}">
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status" class="form-select no-select2">
+                <option value="">All</option>
+                <option value="active"      {% if request.GET.status == 'active'      %}selected{% endif %}>Active</option>
+                <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>Maintenance</option>
+                <option value="retired"     {% if request.GET.status == 'retired'     %}selected{% endif %}>Retired</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Custodian</label>
+            <select name="custodian" class="form-select no-select2">
+                <option value="">All</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+<!-- Table -->
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left:24px;">Printer</th>
+                <th>Model</th>
+                <th>Serial No.</th>
+                <th>Custodian</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th class="text-end" style="padding-right:24px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for printer in printers %}
+            <tr>
+                <td style="padding-left:24px; font-weight:600;">
+                    <a href="{% url 'printer_detail' printer.pk %}" style="color: var(--text-1); text-decoration: none;">{{ printer.name }}</a>
+                </td>
+                <td style="color:var(--text-2);">{{ printer.printer_model }}</td>
+                <td><code>{{ printer.serial_number }}</code></td>
+                <td style="color:var(--text-2);">{{ printer.custodian.get_full_name|default:printer.custodian.username|default:"—" }}</td>
+                <td style="color:var(--text-2);">{{ printer.location }}</td>
+                <td>
+                    {% if printer.status == 'active' %}<span class="badge badge-success">Active</span>
+                    {% elif printer.status == 'maintenance' %}<span class="badge badge-warning">Maintenance</span>
+                    {% else %}<span class="badge badge-muted">Retired</span>{% endif %}
+                </td>
+                <td style="text-align:right; padding-right:24px;">
+                    <a href="{% url 'printer_update' printer.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'printer_delete' printer.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-printer"></i></div>
+                        <h5>No printers registered</h5>
+                        <p>Add your first printer to begin tracking installations.</p>
+                        <a href="{% url 'printer_create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Add Printer
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

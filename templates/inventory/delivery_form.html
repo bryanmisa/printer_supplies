@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Deliveries{% endblock %}
+{% block page_title %}Deliveries{% endblock %}
+
+{% block content %}
+<form method="post" class="card">
+    <div class="card-header">{% if object %}Edit Delivery{% else %}Add Delivery{% endif %}</div>
+    <div class="card-body">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="mb-3">
+            <label class="form-label">Supply</label>
+            <select name="supply" id="id_supply" class="form-select">
+                <option value="">Select Supply</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Quantity</label>
+            <input type="number" name="quantity" class="form-control" min="1" value="1">
+        </div>
+        <div class="actions">
+            <a href="{% url 'delivery_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
