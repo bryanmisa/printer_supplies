@@ -21,11 +21,16 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Create admin superuser
+REM Create admin superuser with correct role
 echo.
 echo Creating administrator account...
-python manage.py shell -c "from inventory.models import User; User.objects.filter(username='admin').delete() if User.objects.filter(username='admin').exists() else None; User.objects.create_superuser('admin', 'admin@localhost.com', 'admin123') if not User.objects.filter(username='admin').exists() else None" 2>nul || (
-    echo Superuser creation skipped.
+python manage.py create_admin
+if errorlevel 1 (
+    echo.
+    echo [WARNING] Admin creation had issues. You can create one manually:
+    echo   python manage.py shell
+    echo   from inventory.models import User
+    echo   User.objects.create_superuser('admin', 'admin@localhost.com', 'admin123', role='admin')
 )
 
 echo.
@@ -35,6 +40,7 @@ echo.
 echo Default Administrator Account:
 echo   Username: admin
 echo   Password: admin123
+echo   Role: Administrator
 echo.
 echo URL: http://localhost:8080
 echo ===============================================

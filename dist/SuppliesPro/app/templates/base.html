@@ -30,24 +30,31 @@
     </div>
 
     <nav>
+        {% if user.role != 'staff' %}
         <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
+        {% endif %}
 
         <div class="section-title">Inventory</div>
         <a href="{% url 'supply_list' %}" class="{% if 'supply' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name and 'type' not in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-archive-fill"></i> Supplies
         </a>
+        {% if user.role != 'staff' %}
         <a href="{% url 'supply_type_list' %}" class="{% if 'supply_type' in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-tags-fill"></i> Supply Types
         </a>
+        {% endif %}
         <a href="{% url 'printer_list' %}" class="{% if 'printer' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-printer-fill"></i> Printers
         </a>
+        {% if user.role != 'staff' %}
         <a href="{% url 'printer_model_list' %}" class="{% if 'printer_model' in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-cpu-fill"></i> Printer Models
         </a>
+        {% endif %}
 
+        {% if user.role != 'staff' %}
         <div class="section-title">Operations</div>
         <a href="{% url 'supplier_list' %}" class="{% if 'supplier' in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-truck-flatbed"></i> Suppliers
@@ -58,7 +65,9 @@
         <a href="{% url 'installation_list' %}" class="{% if 'installation' in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-plug-fill"></i> Installations
         </a>
+        {% endif %}
 
+        {% if user.role != 'staff' %}
         <div class="section-title">Analytics</div>
         <a href="{% url 'inventory_report' %}" class="{% if 'inventory_report' in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-file-earmark-bar-graph-fill"></i> Inventory Status
@@ -69,6 +78,7 @@
         <a href="{% url 'consumption_report' %}" class="{% if 'consumption' in request.resolver_match.url_name %}active{% endif %}">
             <i class="bi bi-graph-up-arrow"></i> Consumption
         </a>
+        {% endif %}
 
 {% if user.role == 'admin' %}
         <div class="section-title">Administration</div>

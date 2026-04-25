@@ -168,12 +168,23 @@ class SupplyListView(LoginRequiredMixin, ListView):
         if supplier:
             queryset = queryset.filter(suppliers_id=supplier)
 
+        if self.request.user.role == 'staff':
+            staff_printers = Printer.objects.filter(custodian=self.request.user)
+            staff_printer_models = staff_printers.values_list('printer_model_id', flat=True)
+            queryset = queryset.filter(printer_models__id__in=staff_printer_models).distinct()
+
         return queryset.select_related()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['printer_models'] = PrinterModel.objects.all()
-        context['suppliers'] = Supplier.objects.filter(is_active=True)
+        if self.request.user.role == 'staff':
+            context['printer_models'] = PrinterModel.objects.filter(
+                id__in=Printer.objects.filter(custodian=self.request.user).values_list('printer_model_id', flat=True)
+            )
+            context['suppliers'] = Supplier.objects.none()
+        else:
+            context['printer_models'] = PrinterModel.objects.all()
+            context['suppliers'] = Supplier.objects.filter(is_active=True)
         return context
 
 
@@ -405,11 +416,17 @@ class PrinterListView(LoginRequiredMixin, ListView):
         if custodian:
             queryset = queryset.filter(custodian_id=custodian)
 
+        if self.request.user.role == 'staff':
+            queryset = queryset.filter(custodian=self.request.user)
+
         return queryset.select_related('printer_model', 'custodian')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.all()
+        if self.request.user.role != 'staff':
+            context['users'] = User.objects.all()
+        else:
+            context['users'] = User.objects.filter(pk=self.request.user.pk)
         return context
 
 
@@ -1579,6 +1596,36 @@ def user_toggle_active(request, pk):
     status = "activated" if user.is_active else "deactivated"
     messages.success(request, f'User {user.username} {status}.')
     return redirect('user_list')
+
+
+@admin_required
+def user_reset_password(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if not new_password or not confirm_password:
+            messages.error(request, 'Both password fields are required.')
+            return redirect('user_reset_password', pk=pk)
+        
+        if new_password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('user_reset_password', pk=pk)
+        
+        if len(new_password) < 8:
+            messages.error(request, 'Password must be at least 8 characters.')
+            return redirect('user_reset_password', pk=pk)
+        
+        user.set_password(new_password)
+        user.save()
+        
+        messages.success(request, f'Password for {user.username} has been reset.')
+        log_audit(request.user, 'update', user, {'action': 'password_reset', 'username': user.username})
+        return redirect('user_list')
+    
+    return render(request, 'inventory/user_reset_password.html', {'user_obj': user})
 
 
 @admin_required

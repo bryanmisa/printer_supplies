@@ -67,6 +67,9 @@
                                 <a href="{% url 'user_edit' user.pk %}" class="btn btn-outline-primary" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                <a href="{% url 'user_reset_password' user.pk %}" class="btn btn-outline-warning" title="Reset Password">
+                                    <i class="bi bi-key-fill"></i>
+                                </a>
                                 <a href="{% url 'user_toggle' user.pk %}" class="btn btn-outline-{% if user.is_active %}warning{% else %}success{% endif %}" title="{% if user.is_active %}Deactivate{% else %}Activate{% endif %}">
                                     <i class="bi bi-{% if user.is_active %}person-dash{% else %}person-check{% endif %}"></i>
                                 </a>

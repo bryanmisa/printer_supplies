@@ -16,10 +16,15 @@
 </div>
 
 <form method="get" class="filter-bar">
+        {% if user.role != 'staff' %}
         <div class="filter-group" style="flex:1;">
+            {% else %}
+        <div class="filter-group" style="flex:1;">
+            {% endif %}
             <label>Search</label>
             <input type="text" name="q" class="form-control" placeholder="Name or serial…" value="{{ request.GET.q }}">
         </div>
+        {% if user.role != 'staff' %}
         <div class="filter-group">
             <label>Status</label>
             <select name="status" class="form-select no-select2">
@@ -38,6 +43,7 @@
                 {% endfor %}
             </select>
         </div>
+        {% endif %}
         <button type="submit" class="btn btn-primary">Filter</button>
     </form>
 
@@ -78,7 +84,13 @@
                 </td>
                 <td style="color:var(--text-2);">{{ printer.printer_model }}</td>
                 <td><code>{{ printer.serial_number }}</code></td>
-                <td style="color:var(--text-2);">{{ printer.custodian.get_full_name|default:printer.custodian.username|default:"—" }}</td>
+                <td style="color:var(--text-2);">
+                    {% if printer.custodian %}
+                        {{ printer.custodian.get_full_name|default:printer.custodian.username }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
                 <td style="color:var(--text-2);">{{ printer.location }}</td>
                 <td>
                     {% if printer.ip_address %}
@@ -112,9 +124,11 @@
                         <div class="empty-icon"><i class="bi bi-printer"></i></div>
                         <h5>No printers registered</h5>
                         <p>Add your first printer to begin tracking installations.</p>
+                        {% if user.role != 'staff' %}
                         <a href="{% url 'printer_create' %}" class="btn btn-primary mt-2">
                             <i class="bi bi-plus-lg"></i> Add Printer
                         </a>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
