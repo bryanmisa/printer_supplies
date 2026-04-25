@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Database Backup – SuppliesPro{% endblock %}
+{% block page_title %}Database Backup{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Database Backup & Restore</h2>
+        <p>Manage database backups for disaster recovery</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon primary">
+                <i class="bi bi-download"></i>
+            </div>
+            <div class="stat-info">
+                <p>Total Backups</p>
+                <h3>{{ backups|length }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon info">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="stat-info">
+                <p>Latest Backup</p>
+                <h3>{% if backups %}{{ backups.0.modified|date:"M d, Y H:i" }}{% else %}None{% endif %}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-upload me-2"></i> Upload Backup
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" action="{% url 'database_backup' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="upload">
+            <div class="mb-3">
+                <label for="uploadFile" class="form-label" style="color: var(--text-1); font-weight: 600;">Select .sqlite3 File</label>
+                <input type="file" name="backup_file" id="uploadFile" class="form-control" accept=".sqlite3" required>
+                <div class="form-text">Upload a previously downloaded backup file to restore.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-upload"></i> Upload Backup
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-database-fill me-2"></i> Create New Backup
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'database_backup' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="backup">
+            <p style="color: var(--text-2); margin-bottom: 16px;">Create a full backup of the SQLite database. This includes all supplies, printers, installations, and user data.</p>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-download"></i> Create Backup Now
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header" style="background: rgba(16,185,129,.15); border-color: rgba(16,185,129,.3);">
+        <i class="bi bi-folder-fill me-2"></i> Available Backups
+    </div>
+    <div class="card-body p-0">
+        {% if backups %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Size</th>
+                    <th>Created</th>
+                    <th class="text-end" style="padding-right:24px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for backup in backups %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--text-1);">{{ backup.name }}</td>
+                    <td style="color: var(--text-2);">{{ backup.size|filesizeformat }}</td>
+                    <td style="color: var(--text-2);">{{ backup.modified|date:"M d, Y H:i:s" }}</td>
+                    <td class="text-end">
+                        <form method="post" action="{% url 'database_backup' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="download">
+                            <input type="hidden" name="backup_file" value="{{ backup.name }}">
+                            <button type="submit" class="btn btn-ghost btn-sm" title="Download">
+                                <i class="bi bi-download"></i>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'database_backup' %}" style="display: inline;" onsubmit="return confirm('Restore database from {{ backup.name }}? Current data will be replaced.')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="restore">
+                            <input type="hidden" name="backup_file" value="{{ backup.name }}">
+                            <button type="submit" class="btn btn-primary btn-sm" title="Restore">
+                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'database_backup' %}" style="display: inline;" onsubmit="return confirm('Delete {{ backup.name }}? This cannot be undone.')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="backup_file" value="{{ backup.name }}">
+                            <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-folder"></i>
+            <h5>No backups yet</h5>
+            <p>Create your first backup to protect your data.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4" style="background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);">
+    <div class="card-header" style="background: transparent; border-bottom: 1px solid rgba(239,68,68,.3);">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--danger);"></i> Disaster Recovery Instructions
+    </div>
+    <div class="card-body">
+        <ol style="color: var(--text-2); padding-left: 20px;">
+            <li style="margin-bottom: 8px;"><strong>Download a backup</strong> - Click the download button next to a backup file to save it locally.</li>
+            <li style="margin-bottom: 8px;"><strong>Restore the database</strong> - Use the Restore button to replace the current database with a backup. Current data will be lost.</li>
+            <li style="margin-bottom: 8px;"><strong>In case of complete failure</strong> - Copy the downloaded .sqlite3 file to your server's database location and restart the application.</li>
+        </ol>
+        <div class="alert alert-warning mt-3" role="alert" style="background: rgba(255,193,7,.15); border: 1px solid rgba(255,193,7,.3); color: var(--text-1);">
+            <i class="bi bi-info-circle-fill me-2" style="color: #ffc107;"></i>
+            <strong>Best Practice:</strong> Schedule regular backups and store copies in a safe, offsite location.
+        </div>
+    </div>
+</div>
+{% endblock %}

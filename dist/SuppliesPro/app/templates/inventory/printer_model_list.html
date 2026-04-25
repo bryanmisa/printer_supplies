@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Printer Models - SuppliesPro{% endblock %}
+{% block page_title %}Printer Models{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted m-0">Manage hardware compatibility groups</p>
+    </div>
+    {% if user.role != 'staff' %}
+    <a href="{% url 'printer_model_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>New Model
+    </a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Manufacturer</th>
+                        <th>Model Name</th>
+                        <th>Compatible Supplies</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pm in printer_models %}
+                    <tr>
+                        <td><span class="fw-bold">{{ pm.manufacturer }}</span></td>
+                        <td><a href="{% url 'printer_model_detail' pm.pk %}" style="color: var(--text-1); text-decoration: none;">{{ pm.name }}</a></td>
+                        <td>
+                            <span class="badge badge-neon">{{ pm.supplies.count }} Supplies</span>
+                        </td>
+                        <td class="text-end">
+                            {% if user.role != 'staff' %}
+                            <a href="{% url 'printer_model_update' pm.pk %}" class="btn btn-sm btn-light">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="bi bi-cpu"></i>
+                                <h5>No models defined</h5>
+                                <p>Create a printer model to start organizing your inventory</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

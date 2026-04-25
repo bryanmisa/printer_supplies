@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Supply Types - Printer Supplies{% endblock %}
+{% block page_title %}Supply Types{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Supply Types</span>
+        {% if user.role != 'staff' %}
+        <a href="{% url 'supply_type_create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Add Supply Type
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <form method="get" class="filter-bar" style="padding: 16px;">
+            <div class="filter-group" style="flex:2;">
+                <input type="text" name="q" class="form-control" placeholder="Search supply types..." value="{{ request.GET.q }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        {% if supply_types %}
+        <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Supplies Count</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for st in supply_types %}
+                <tr>
+                    <td>
+                        <a href="{% url 'supply_type_detail' st.pk %}">{{ st.name }}</a>
+                    </td>
+                    <td>{{ st.supplies.count }}</td>
+                    <td>
+                        {% if user.role != 'staff' %}
+                        <a href="{% url 'supply_type_update' st.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'supply_type_delete' st.pk %}" class="btn btn-danger btn-sm" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="bi bi-tags"></i></div>
+            <h5>No supply types found</h5>
+            <p>Add a supply type to categorize your supplies.</p>
+            <a href="{% url 'supply_type_create' %}" class="btn btn-primary mt-2">
+                <i class="bi bi-plus-lg"></i> Add Supply Type
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

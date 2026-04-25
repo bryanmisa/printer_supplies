@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Suppliers - Printer Supplies{% endblock %}
+{% block page_title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Suppliers</span>
+        {% if user.role != 'staff' %}
+        <a href="{% url 'supplier_create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Add Supplier
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <form method="get" class="filter-bar" style="padding: 16px;">
+            <div class="filter-group" style="flex:2;">
+                <input type="text" name="q" class="form-control" placeholder="Search suppliers..." value="{{ request.GET.q }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        {% if suppliers %}
+        <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in suppliers %}
+                <tr>
+                    <td><a href="{% url 'supplier_detail' supplier.pk %}">{{ supplier.name }}</a></td>
+                    <td>{{ supplier.contact_name }}</td>
+                    <td>{{ supplier.email }}</td>
+                    <td>{{ supplier.phone }}</td>
+                    <td>
+                        {% if supplier.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-muted">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.role != 'staff' %}
+                        <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'supplier_toggle' supplier.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-ghost btn-sm" title="{% if supplier.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                {% if supplier.is_active %}
+                                <i class="bi bi-toggle-on" style="color: var(--success);"></i>
+                                {% else %}
+                                <i class="bi bi-toggle-off" style="color: var(--text-3);"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                        <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-ghost btn-sm" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-truck"></i>
+            <h3>No suppliers found</h3>
+            <p>Add your first supplier to get started</p>
+            <a href="{% url 'supplier_create' %}" class="btn btn-primary">Add Supplier</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

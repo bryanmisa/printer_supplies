@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Delete Supply Type - Printer Supplies{% endblock %}
+{% block page_title %}Delete Supply Type{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <div class="card-header">Delete Supply Type</div>
+    <div class="card-body">
+        <p>Are you sure you want to delete <strong>{{ supply_type.name }}</strong>?</p>
+        {% if supply_type.supplies.count > 0 %}
+        <p class="text-warning">This type is used by {{ supply_type.supplies.count }} supply/supplies.</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <a href="{% url 'supply_type_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

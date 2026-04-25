@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Sign In – SuppliesPro{% endblock %}
+
+{% block login_content %}
+<!-- Left Panel -->
+<div class="login-left">
+    <div class="login-left-bg"></div>
+    <div class="login-left-content">
+        <div class="brand-mark">
+            <i class="bi bi-printer-fill"></i>
+            SuppliesPro
+        </div>
+        <div class="tagline">
+            <h2>Smarter Printer<br>Supply Management</h2>
+            <p>Track inventory, manage deliveries, and get replenishment alerts — all from one beautiful dashboard.</p>
+            <div class="feature-chips">
+                <div class="feature-chip"><i class="bi bi-check-circle-fill"></i> Real-time Stock</div>
+                <div class="feature-chip"><i class="bi bi-check-circle-fill"></i> Audit Trail</div>
+                <div class="feature-chip"><i class="bi bi-check-circle-fill"></i> Reports & PDF</div>
+                <div class="feature-chip"><i class="bi bi-check-circle-fill"></i> Supplier Alerts</div>
+            </div>
+        </div>
+        <p style="color:rgba(255,255,255,.35); font-size:.8rem;">&copy; 2026 SuppliesPro Systems</p>
+    </div>
+</div>
+
+<!-- Right Panel -->
+<div class="login-right">
+    <div class="login-box">
+        <div class="logo"><i class="bi bi-printer-fill"></i></div>
+
+        <h2>Welcome back</h2>
+        <p class="subtitle">Sign in to your account to continue</p>
+
+        {% if form.errors %}
+        <div class="alert alert-danger mb-4">
+            <i class="bi bi-exclamation-octagon-fill"></i>
+            Invalid username or password. Please try again.
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="login-field-wrap">
+                <i class="bi bi-person-fill field-icon"></i>
+                <input type="text" name="username" class="form-control"
+                       placeholder="Username" autofocus autocomplete="username"
+                       value="{{ remembered_username|default:'' }}">
+            </div>
+
+            <div class="login-field-wrap">
+                <i class="bi bi-shield-lock-fill field-icon"></i>
+                <input type="password" name="password" class="form-control"
+                       placeholder="Password" autocomplete="current-password">
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4" style="margin-top:-6px;">
+                <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+                    <input type="checkbox" name="remember_me" class="form-check-input" style="margin:0;">
+                    <span style="color:var(--text-2); font-size:.85rem;">Remember me</span>
+                </label>
+                <a href="#" style="font-size:.85rem; font-weight:600;">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <div class="login-footer">
+            Secure access &nbsp;·&nbsp; SuppliesPro v1.0
+        </div>
+    </div>
+</div>
+{% endblock %}

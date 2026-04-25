@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Update Printer{% else %}New Printer{% endif %} – SuppliesPro{% endblock %}
+{% block page_title %}{% if object %}Update Printer{% else %}Register Printer{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{% if object %}{{ object.name }}{% else %}New Printer{% endif %}</h2>
+        <p>{% if object %}Update hardware details and assignment{% else %}Register a new printer into the system{% endif %}</p>
+    </div>
+    <a href="{% url 'printer_list' %}" class="btn btn-ghost">
+        <i class="bi bi-arrow-left"></i> Back to Printers
+    </a>
+</div>
+
+<form method="post" novalidate enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Section 1: Basic Info -->
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-printer-fill"></i> Primary Information
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.name.id_for_label }}">Printer Name / Label <span style="color:var(--danger);">*</span></label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.printer_model.id_for_label }}">Hardware Model <span style="color:var(--danger);">*</span></label>
+                    {{ form.printer_model }}
+                    {% if form.printer_model.errors %}<div class="invalid-feedback">{{ form.printer_model.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.serial_number.id_for_label }}">Serial Number <span style="color:var(--danger);">*</span></label>
+                    {{ form.serial_number }}
+                    {% if form.serial_number.errors %}<div class="invalid-feedback">{{ form.serial_number.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.status.id_for_label }}">Operational Status <span style="color:var(--danger);">*</span></label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="invalid-feedback">{{ form.status.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Assignment & Location -->
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-geo-alt-fill"></i> Assignment & Location
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.custodian.id_for_label }}">Custodian</label>
+                    {{ form.custodian }}
+                    <div class="form-text">The person responsible for this printer.</div>
+                    {% if form.custodian.errors %}<div class="invalid-feedback">{{ form.custodian.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.location.id_for_label }}">Physical Location <span style="color:var(--danger);">*</span></label>
+                    {{ form.location }}
+                    <div class="form-text">e.g. Floor 3, Room 302, Reception Desk</div>
+                    {% if form.location.errors %}<div class="invalid-feedback">{{ form.location.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.ip_address.id_for_label }}">Printer IP Address <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.ip_address }}
+                    <div class="form-text">The printer's network IP address (e.g. 192.168.1.100).</div>
+                    {% if form.ip_address.errors %}<div class="invalid-feedback">{{ form.ip_address.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.image.id_for_label }}">Image <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.image }}
+                    <div class="form-text">Upload a photo of the printer.</div>
+                    {% if form.image.errors %}<div class="invalid-feedback">{{ form.image.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Notes -->
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-journal-text"></i> Maintenance Notes
+        </div>
+        <div class="field-group">
+            <label for="{{ form.notes.id_for_label }}">Notes <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+            {{ form.notes }}
+            <div class="form-text">Record any maintenance history, quirks, or special instructions for this device.</div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex flex-wrap gap-3 justify-content-between">
+        <a href="{% url 'printer_list' %}" class="btn btn-ghost">
+            <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-lg"></i>
+            {% if object %}Save Changes{% else %}Register Printer{% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}
