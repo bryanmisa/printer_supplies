@@ -1,19 +1,33 @@
 @echo off
-cd /d "%~dp0app"
-echo Initializing database...
+cd /d "%~dp0..\app"
+
+REM Check if venv exists
+if exist "..\venv\Scripts\python.exe" (
+    set PYTHON=..\venv\Scripts\python.exe
+) else (
+    echo [ERROR] Virtual environment not found. Run install.bat first.
+    pause
+    exit /b 1
+)
+
+echo.
+echo ===============================================
+echo  SuppliesPro - Database Setup (Windows)
+echo ===============================================
 echo.
 
 REM Check if database already exists
 if exist "db.sqlite3" (
     echo Database already exists. Skipping initialization.
     echo.
-    echo Run start.bat to launch the application.
+    echo Run: windows\start.bat
     pause
     exit /b 0
 )
 
 REM Run migrations
-python manage.py migrate --noinput
+echo Running migrations...
+%PYTHON% manage.py migrate --noinput
 if errorlevel 1 (
     echo.
     echo [ERROR] Migration failed. Run install.bat first.
@@ -24,11 +38,11 @@ if errorlevel 1 (
 REM Create admin superuser with correct role
 echo.
 echo Creating administrator account...
-python manage.py create_admin
+%PYTHON% manage.py create_admin
 if errorlevel 1 (
     echo.
     echo [WARNING] Admin creation had issues. You can create one manually:
-    echo   python manage.py shell
+    echo   %PYTHON% manage.py shell
     echo   from inventory.models import User
     echo   User.objects.create_superuser('admin', 'admin@localhost.com', 'admin123', role='admin')
 )
@@ -45,5 +59,5 @@ echo.
 echo URL: http://localhost:8080
 echo ===============================================
 echo.
-echo Run start.bat to launch the application.
+echo Run: windows\start.bat
 pause
