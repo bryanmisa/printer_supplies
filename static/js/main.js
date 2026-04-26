@@ -108,10 +108,58 @@ function closeSidebar() {
 }
 
 // ── Collapsible Sidebar Sections ───────────────────────
+// Restore collapsed state from localStorage
+function restoreSidebarState() {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    const collapsedSections = savedState ? JSON.parse(savedState) : [];
+    
+    // First, expand all sections (reset to default)
+    document.querySelectorAll('.nav-section').forEach(section => {
+        section.classList.remove('collapsed');
+        const icon = section.querySelector('.section-title i');
+        const items = section.querySelector('.nav-section-items');
+        if (icon) {
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-chevron-down');
+        }
+        if (items) items.style.maxHeight = '500px';
+    });
+    
+    // Then, collapse the ones that were saved
+    document.querySelectorAll('.nav-section').forEach(section => {
+        const sectionName = section.dataset.section;
+        if (collapsedSections.includes(sectionName)) {
+            section.classList.add('collapsed');
+            const icon = section.querySelector('.section-title i');
+            const items = section.querySelector('.nav-section-items');
+            if (icon) {
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-right');
+            }
+            if (items) items.style.maxHeight = '0';
+        }
+    });
+}
+
+// Save collapsed state to localStorage
+function saveSidebarState() {
+    const collapsedSections = [];
+    document.querySelectorAll('.nav-section.collapsed').forEach(section => {
+        const sectionName = section.dataset.section;
+        if (sectionName) collapsedSections.push(sectionName);
+    });
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(collapsedSections));
+}
+
+// Restore state on page load
+document.addEventListener('DOMContentLoaded', restoreSidebarState);
+// Also run after a short delay to ensure it applies
+window.addEventListener('load', restoreSidebarState);
+
 function toggleNavSection(el) {
     const section = el.parentElement;
     const items = section.querySelector('.nav-section-items');
-    const icon = el.querySelector('.bi-chevron-down');
+    const icon = el.querySelector('.bi-chevron-down') || el.querySelector('.bi-chevron-right');
     
     if (section.classList.contains('collapsed')) {
         section.classList.remove('collapsed');
@@ -124,6 +172,9 @@ function toggleNavSection(el) {
         icon.classList.add('bi-chevron-right');
         items.style.maxHeight = '0';
     }
+    
+    // Save state to localStorage
+    saveSidebarState();
 }
 
 // ── Validation Modal ───────────────────────────────────────

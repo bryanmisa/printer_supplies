@@ -36,7 +36,7 @@
         </a>
         {% endif %}
 
-        <div class="nav-section">
+        <div class="nav-section" data-section="inventory">
             <div class="section-title" onclick="toggleNavSection(this)">
                 <i class="bi bi-chevron-down"></i> Inventory
             </div>
@@ -61,7 +61,7 @@
         </div>
 
         {% if user.role != 'staff' %}
-        <div class="nav-section">
+        <div class="nav-section" data-section="operations">
             <div class="section-title" onclick="toggleNavSection(this)">
                 <i class="bi bi-chevron-down"></i> Operations
             </div>
@@ -80,7 +80,7 @@
         {% endif %}
 
         {% if user.role != 'staff' %}
-        <div class="nav-section">
+        <div class="nav-section" data-section="analytics">
             <div class="section-title" onclick="toggleNavSection(this)">
                 <i class="bi bi-chevron-down"></i> Analytics
             </div>
@@ -99,7 +99,7 @@
         {% endif %}
 
     {% if user.role == 'admin' %}
-        <div class="nav-section">
+        <div class="nav-section" data-section="administration">
             <div class="section-title" onclick="toggleNavSection(this)">
                 <i class="bi bi-chevron-down"></i> Administration
             </div>

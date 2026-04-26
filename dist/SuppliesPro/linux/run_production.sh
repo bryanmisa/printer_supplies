@@ -40,14 +40,4 @@ echo
 echo "  Press Ctrl+C to stop the server"
 echo "==============================================="
 echo
-cd "$PARENT_DIR/app"
-python3 -c "
-import sys
-import os
-sys.path.insert(0, os.getcwd())
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'printer_supplies.settings')
-from waitress import serve
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
-serve(application, host='0.0.0.0', port=8080)
-"
+$PYTHON serve_prod.py
