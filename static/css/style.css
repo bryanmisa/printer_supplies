@@ -121,6 +121,37 @@ body p.text-muted {
   padding: 20px 12px 6px;
 }
 
+.nav-section { margin-bottom: 4px; }
+
+.section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-3);
+  padding: 14px 12px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: color .2s;
+  user-select: none;
+}
+
+.section-title:hover { color: var(--text-2); }
+
+.section-title i { font-size: 0.75rem; transition: transform .2s; }
+
+.nav-section-items {
+  overflow: hidden;
+  max-height: 500px;
+  transition: max-height .3s ease;
+}
+
+.nav-section.collapsed .nav-section-items {
+  max-height: 0;
+}
+
 .sidebar nav a {
   display: flex;
   align-items: center;

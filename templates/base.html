@@ -29,69 +29,93 @@
         <span>SuppliesPro</span>
     </div>
 
-    <nav>
+<nav>
         {% if user.role != 'staff' %}
         <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
         {% endif %}
 
-        <div class="section-title">Inventory</div>
-        <a href="{% url 'supply_list' %}" class="{% if 'supply' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name and 'type' not in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-archive-fill"></i> Supplies
-        </a>
+        <div class="nav-section">
+            <div class="section-title" onclick="toggleNavSection(this)">
+                <i class="bi bi-chevron-down"></i> Inventory
+            </div>
+            <div class="nav-section-items">
+                <a href="{% url 'supply_list' %}" class="{% if 'supply' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name and 'type' not in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-archive-fill"></i> Supplies
+                </a>
+                {% if user.role != 'staff' %}
+                <a href="{% url 'supply_type_list' %}" class="{% if 'supply_type' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-tags-fill"></i> Supply Types
+                </a>
+                {% endif %}
+                <a href="{% url 'printer_list' %}" class="{% if 'printer' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-printer-fill"></i> Printers
+                </a>
+                {% if user.role != 'staff' %}
+                <a href="{% url 'printer_model_list' %}" class="{% if 'printer_model' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-cpu-fill"></i> Printer Models
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
         {% if user.role != 'staff' %}
-        <a href="{% url 'supply_type_list' %}" class="{% if 'supply_type' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-tags-fill"></i> Supply Types
-        </a>
-        {% endif %}
-        <a href="{% url 'printer_list' %}" class="{% if 'printer' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-printer-fill"></i> Printers
-        </a>
-        {% if user.role != 'staff' %}
-        <a href="{% url 'printer_model_list' %}" class="{% if 'printer_model' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-cpu-fill"></i> Printer Models
-        </a>
+        <div class="nav-section">
+            <div class="section-title" onclick="toggleNavSection(this)">
+                <i class="bi bi-chevron-down"></i> Operations
+            </div>
+            <div class="nav-section-items">
+                <a href="{% url 'supplier_list' %}" class="{% if 'supplier' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-truck-flatbed"></i> Suppliers
+                </a>
+                <a href="{% url 'delivery_list' %}" class="{% if 'delivery' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-cart-check-fill"></i> Deliveries
+                </a>
+                <a href="{% url 'installation_list' %}" class="{% if 'installation' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-plug-fill"></i> Installations
+                </a>
+            </div>
+        </div>
         {% endif %}
 
         {% if user.role != 'staff' %}
-        <div class="section-title">Operations</div>
-        <a href="{% url 'supplier_list' %}" class="{% if 'supplier' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-truck-flatbed"></i> Suppliers
-        </a>
-        <a href="{% url 'delivery_list' %}" class="{% if 'delivery' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-cart-check-fill"></i> Deliveries
-        </a>
-        <a href="{% url 'installation_list' %}" class="{% if 'installation' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-plug-fill"></i> Installations
-        </a>
+        <div class="nav-section">
+            <div class="section-title" onclick="toggleNavSection(this)">
+                <i class="bi bi-chevron-down"></i> Analytics
+            </div>
+            <div class="nav-section-items">
+                <a href="{% url 'inventory_report' %}" class="{% if 'inventory_report' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-file-earmark-bar-graph-fill"></i> Inventory Status
+                </a>
+                <a href="{% url 'replenishment_report' %}" class="{% if 'replenishment' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-arrow-repeat"></i> Replenishment
+                </a>
+                <a href="{% url 'consumption_report' %}" class="{% if 'consumption' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-graph-up-arrow"></i> Consumption
+                </a>
+            </div>
+        </div>
         {% endif %}
 
-        {% if user.role != 'staff' %}
-        <div class="section-title">Analytics</div>
-        <a href="{% url 'inventory_report' %}" class="{% if 'inventory_report' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-file-earmark-bar-graph-fill"></i> Inventory Status
-        </a>
-        <a href="{% url 'replenishment_report' %}" class="{% if 'replenishment' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-arrow-repeat"></i> Replenishment
-        </a>
-        <a href="{% url 'consumption_report' %}" class="{% if 'consumption' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-graph-up-arrow"></i> Consumption
-        </a>
-        {% endif %}
-
-{% if user.role == 'admin' %}
-        <div class="section-title">Administration</div>
-        <a href="{% url 'user_list' %}" class="{% if 'user' in request.resolver_match.url_name and 'list' not in request.resolver_match.url_name and 'create' not in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-people-fill"></i> Users
-        </a>
-        <a href="{% url 'database_backup' %}" class="{% if 'database_backup' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-database-fill"></i> Database Backup
-        </a>
-        <a href="{% url 'audit_log' %}" class="{% if 'audit' in request.resolver_match.url_name %}active{% endif %}">
-            <i class="bi bi-shield-lock-fill"></i> Audit Trail
-        </a>
-{% endif %}
+    {% if user.role == 'admin' %}
+        <div class="nav-section">
+            <div class="section-title" onclick="toggleNavSection(this)">
+                <i class="bi bi-chevron-down"></i> Administration
+            </div>
+            <div class="nav-section-items">
+                <a href="{% url 'user_list' %}" class="{% if 'user' in request.resolver_match.url_name and 'list' not in request.resolver_match.url_name and 'create' not in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i> Users
+                </a>
+                <a href="{% url 'database_backup' %}" class="{% if 'database_backup' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-database-fill"></i> Database Backup
+                </a>
+                <a href="{% url 'audit_log' %}" class="{% if 'audit' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-shield-lock-fill"></i> Audit Trail
+                </a>
+            </div>
+        </div>
+    {% endif %}
     </nav>
 
     <div class="user-info">

@@ -107,6 +107,25 @@ function closeSidebar() {
     $('body').css('overflow', '');
 }
 
+// ── Collapsible Sidebar Sections ───────────────────────
+function toggleNavSection(el) {
+    const section = el.parentElement;
+    const items = section.querySelector('.nav-section-items');
+    const icon = el.querySelector('.bi-chevron-down');
+    
+    if (section.classList.contains('collapsed')) {
+        section.classList.remove('collapsed');
+        icon.classList.remove('bi-chevron-right');
+        icon.classList.add('bi-chevron-down');
+        items.style.maxHeight = items.scrollHeight + 'px';
+    } else {
+        section.classList.add('collapsed');
+        icon.classList.remove('bi-chevron-down');
+        icon.classList.add('bi-chevron-right');
+        items.style.maxHeight = '0';
+    }
+}
+
 // ── Validation Modal ───────────────────────────────────────
 function showValidationModal(fields) {
     const $modal = $('#validationModal');
