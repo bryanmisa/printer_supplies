@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from .models import Supply, Printer, PrinterModel, Supplier, SupplyType, Delivery, DeliveryItem, SupplyInstallation, User
+from .models import Supply, Printer, PrinterModel, Supplier, SupplyType, Delivery, DeliveryItem, SupplyInstallation, User, Department, Location, Custodian
 
 
 class SupplyTypeForm(forms.ModelForm):
@@ -10,6 +10,44 @@ class SupplyTypeForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class DepartmentForm(forms.ModelForm):
+    class Meta:
+        model = Department
+        fields = ['name', 'description', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class LocationForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ['name', 'description', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class CustodianForm(forms.ModelForm):
+    class Meta:
+        model = Custodian
+        fields = ['first_name', 'last_name', 'department', 'location', 'email', 'phone', 'notes', 'is_active']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'department': forms.Select(attrs={'class': 'form-select select2-select'}),
+            'location': forms.Select(attrs={'class': 'form-select select2-select'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
@@ -28,13 +66,12 @@ class LoginForm(AuthenticationForm):
 class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    is_staff = forms.BooleanField(label='Staff Status', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     is_superuser = forms.BooleanField(label='Superuser Status', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     is_active = forms.BooleanField(label='Active', required=False, initial=True, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'role', 'phone', 'department']
+        fields = ['username', 'email', 'first_name', 'last_name', 'role', 'phone']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -42,7 +79,6 @@ class UserCreationForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-select'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'department': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def clean_password2(self):
@@ -77,29 +113,39 @@ class SupplierForm(forms.ModelForm):
 class PrinterModelForm(forms.ModelForm):
     class Meta:
         model = PrinterModel
-        fields = ['name', 'manufacturer', 'description']
+        fields = ['name', 'manufacturer', 'description', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 
 class PrinterForm(forms.ModelForm):
     class Meta:
         model = Printer
-        fields = ['name', 'printer_model', 'serial_number', 'custodian', 'status', 'location', 'ip_address', 'image', 'notes']
+        fields = ['name', 'printer_model', 'serial_number', 'custodian', 'department', 'location', 'status', 'ip_address', 'image', 'notes']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-            'printer_model': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'printer_model': forms.Select(attrs={'class': 'form-select select2-select', 'required': True}),
             'serial_number': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-            'custodian': forms.Select(attrs={'class': 'form-select'}),
+            'custodian': forms.Select(attrs={'class': 'form-select select2-select'}),
+            'department': forms.Select(attrs={'class': 'form-select select2-select'}),
+            'location': forms.Select(attrs={'class': 'form-select select2-select'}),
             'status': forms.Select(attrs={'class': 'form-select', 'required': True}),
-            'location': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'ip_address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 192.168.1.100'}),
             'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        custodian = cleaned_data.get('custodian')
+        department = cleaned_data.get('department')
+        if not custodian and not department:
+            raise forms.ValidationError('Either a custodian or department must be assigned.')
+        return cleaned_data
 
 
 class SupplyForm(forms.ModelForm):
@@ -109,10 +155,10 @@ class SupplyForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
             'sku': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
-            'supply_type': forms.Select(attrs={'class': 'form-select'}),
+            'supply_type': forms.Select(attrs={'class': 'form-select select2-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'printer_models': forms.SelectMultiple(attrs={'class': 'form-select', 'required': True}),
-            'suppliers': forms.SelectMultiple(attrs={'class': 'form-select', 'required': True}),
+            'printer_models': forms.SelectMultiple(attrs={'class': 'form-select select2-select', 'required': True}),
+            'suppliers': forms.SelectMultiple(attrs={'class': 'form-select select2-select', 'required': True}),
             'current_stock': forms.NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
             'low_stock_threshold': forms.NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
             'max_stock_threshold': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
@@ -143,7 +189,7 @@ class DeliveryForm(forms.ModelForm):
         model = Delivery
         fields = ['supplier', 'delivery_date', 'delivery_note', 'notes']
         widgets = {
-            'supplier': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'supplier': forms.Select(attrs={'class': 'form-select select2-select', 'required': True}),
             'delivery_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': True}),
             'delivery_note': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
@@ -155,7 +201,7 @@ class DeliveryItemForm(forms.ModelForm):
         model = DeliveryItem
         fields = ['supply', 'quantity']
         widgets = {
-            'supply': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'supply': forms.Select(attrs={'class': 'form-select select2-select', 'required': True}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
         }
 
@@ -175,8 +221,8 @@ class InstallationForm(forms.ModelForm):
         model = SupplyInstallation
         fields = ['printer', 'supply', 'notes']
         widgets = {
-            'printer': forms.Select(attrs={'class': 'form-select', 'required': True}),
-            'supply': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'printer': forms.Select(attrs={'class': 'form-select select2-select', 'required': True}),
+            'supply': forms.Select(attrs={'class': 'form-select select2-select', 'required': True}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 

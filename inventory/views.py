@@ -1516,13 +1516,13 @@ def user_list(request):
     })
 
 
+
 @admin_required
 def user_create(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_staff = form.cleaned_data.get('is_staff', False)
             user.is_superuser = form.cleaned_data.get('is_superuser', False)
             user.save()
             
@@ -1535,6 +1535,7 @@ def user_create(request):
     return render(request, 'inventory/user_form.html', {'form': form})
 
 
+
 @admin_required
 def user_edit(request, pk):
     user = get_object_or_404(User, pk=pk)
@@ -1543,7 +1544,6 @@ def user_edit(request, pk):
         form = UserCreationForm(request.POST, instance=user)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_staff = form.cleaned_data.get('is_staff', False)
             user.is_superuser = form.cleaned_data.get('is_superuser', False)
             user.save()
             
@@ -1558,8 +1558,6 @@ def user_edit(request, pk):
             'last_name': user.last_name,
             'role': user.role,
             'phone': user.phone,
-            'department': user.department,
-            'is_staff': user.is_staff,
             'is_superuser': user.is_superuser,
             'is_active': user.is_active,
         }

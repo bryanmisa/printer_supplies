@@ -66,7 +66,6 @@ class LoginForm(AuthenticationForm):
 class UserCreationForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    is_staff = forms.BooleanField(label='Staff Status', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     is_superuser = forms.BooleanField(label='Superuser Status', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     is_active = forms.BooleanField(label='Active', required=False, initial=True, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
