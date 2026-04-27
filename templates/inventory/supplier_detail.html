@@ -18,41 +18,48 @@
     </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="icon primary">
-                <i class="bi bi-person-fill"></i>
-            </div>
-            <div class="stat-info">
-                <p>Contact Name</p>
-                <h3>{{ supplier.contact_name }}</h3>
-            </div>
-        </div>
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-info-circle me-2"></i> Supplier Information
     </div>
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="icon primary">
-                <i class="bi bi-envelope-fill"></i>
-            </div>
-            <div class="stat-info">
-                <p>Email</p>
-                <h3>{{ supplier.email }}</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="icon {% if supplier.is_active %}success{% else %}muted{% endif %}">
-                <i class="bi bi-circle-fill"></i>
-            </div>
-            <div class="stat-info">
-                <p>Status</p>
-                <h3>
-                    {% if supplier.is_active %}<span class="badge badge-success">Active</span>
-                    {% else %}<span class="badge badge-muted">Inactive</span>{% endif %}
-                </h3>
-            </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <tbody>
+                    <tr>
+                        <td style="width:50px;" class="align-middle text-center">
+                            <div class="icon primary" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div style="color:var(--text-2);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;">Contact Name</div>
+                            <div style="color:var(--text-1);font-weight:800;">{{ supplier.contact_name }}</div>
+                        </td>
+                        <td style="width:50px;" class="align-middle text-center">
+                            <div class="icon primary" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);">
+                                <i class="bi bi-envelope-fill"></i>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div style="color:var(--text-2);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;">Email</div>
+                            <div style="color:var(--text-1);font-weight:800;">{{ supplier.email }}</div>
+                        </td>
+                        <td style="width:50px;" class="align-middle text-center">
+                            <div class="icon {% if supplier.is_active %}success{% else %}muted{% endif %}" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);">
+                                <i class="bi bi-circle-fill"></i>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div style="color:var(--text-2);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;">Status</div>
+                            <div>
+                                {% if supplier.is_active %}<span class="badge badge-success">Active</span>
+                                {% else %}<span class="badge badge-muted">Inactive</span>{% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -43,11 +43,12 @@
         <a href="{% url 'printer_list' %}" class="btn btn-ghost">
             <i class="bi bi-arrow-left"></i> Back
         </a>
-        {% if user.role != 'staff' %}
         <a href="{% url 'printer_update' printer.pk %}" class="btn btn-ghost">
             <i class="bi bi-pencil"></i> Edit
         </a>
-        {% endif %}
+        <a href="{% url 'printer_delete' printer.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Delete
+        </a>
     </div>
 </div>
 
@@ -93,10 +94,18 @@
             <div class="icon info">
                 <i class="bi bi-person-fill"></i>
             </div>
-            <div class="stat-info">
-                <p>Custodian</p>
-                <h3>{{ printer.custodian.username }}</h3>
-            </div>
+    <div class="stat-info">
+        <p>Custodian</p>
+        <h3>
+            {% if printer.custodian %}
+                {{ printer.custodian.full_name }}
+            {% elif printer.department %}
+                {{ printer.department.name }} (No custodian)
+            {% else %}
+                -
+            {% endif %}
+        </h3>
+    </div>
         </div>
     </div>
     {% endif %}

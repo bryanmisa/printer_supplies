@@ -5,13 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SuppliesPro{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/css/inter-font.css">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+    <link href="/static/css/select2.min.css" rel="stylesheet"/>
+    <link href="/static/css/select2-bootstrap-5-theme.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="/static/css/style.css">
     {% block extra_css %}{% endblock %}
 </head>
@@ -30,11 +28,9 @@
     </div>
 
 <nav>
-        {% if user.role != 'staff' %}
         <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
-        {% endif %}
 
         <div class="nav-section" data-section="inventory">
             <div class="section-title" onclick="toggleNavSection(this)">
@@ -44,23 +40,18 @@
                 <a href="{% url 'supply_list' %}" class="{% if 'supply' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name and 'type' not in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-archive-fill"></i> Supplies
                 </a>
-                {% if user.role != 'staff' %}
                 <a href="{% url 'supply_type_list' %}" class="{% if 'supply_type' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-tags-fill"></i> Supply Types
                 </a>
-                {% endif %}
                 <a href="{% url 'printer_list' %}" class="{% if 'printer' in request.resolver_match.url_name and 'model' not in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-printer-fill"></i> Printers
                 </a>
-                {% if user.role != 'staff' %}
                 <a href="{% url 'printer_model_list' %}" class="{% if 'printer_model' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-cpu-fill"></i> Printer Models
                 </a>
-                {% endif %}
             </div>
         </div>
 
-        {% if user.role != 'staff' %}
         <div class="nav-section" data-section="operations">
             <div class="section-title" onclick="toggleNavSection(this)">
                 <i class="bi bi-chevron-down"></i> Operations
@@ -77,9 +68,24 @@
                 </a>
             </div>
         </div>
-        {% endif %}
 
-        {% if user.role != 'staff' %}
+        <div class="nav-section" data-section="people">
+            <div class="section-title" onclick="toggleNavSection(this)">
+                <i class="bi bi-chevron-down"></i> People
+            </div>
+            <div class="nav-section-items">
+                <a href="{% url 'custodian_list' %}" class="{% if 'custodian' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-person-fill"></i> Custodians
+                </a>
+                <a href="{% url 'department_list' %}" class="{% if 'department' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-building-fill"></i> Departments
+                </a>
+                <a href="{% url 'location_list' %}" class="{% if 'location' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-geo-alt-fill"></i> Locations
+                </a>
+            </div>
+        </div>
+
         <div class="nav-section" data-section="analytics">
             <div class="section-title" onclick="toggleNavSection(this)">
                 <i class="bi bi-chevron-down"></i> Analytics
@@ -96,7 +102,6 @@
                 </a>
             </div>
         </div>
-        {% endif %}
 
     {% if user.role == 'admin' %}
         <div class="nav-section" data-section="administration">
@@ -176,9 +181,9 @@
 
 {% endif %}
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/select2.min.js"></script>
 <script src="/static/js/main.js"></script>
 {% block extra_js %}{% endblock %}
 </body>

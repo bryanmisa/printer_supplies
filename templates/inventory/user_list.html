@@ -38,7 +38,6 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Department</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -46,15 +45,14 @@
                 <tbody>
                     {% for user in users %}
                     <tr>
-                        <td>{{ user.username }}</td>
+                        <td><a href="{% url 'user_edit' user.pk %}" style="font-weight:600; color:var(--text-1);">{{ user.username }}</a></td>
                         <td>{{ user.first_name }} {{ user.last_name }}</td>
                         <td>{{ user.email }}</td>
                         <td>
-                            <span class="badge bg-{% if user.role == 'admin' %}danger{% elif user.role == 'manager' %}warning{% else %}info{% endif %}">
+                            <span class="badge bg-{% if user.role == 'admin' %}danger{% else %}warning{% endif %}">
                                 {{ user.get_role_display }}
                             </span>
                         </td>
-                        <td>{{ user.department|default:"-" }}</td>
                         <td>
                             {% if user.is_active %}
                             <span class="badge bg-success">Active</span>
@@ -81,7 +79,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4">No users found.</td>
+                        <td colspan="6" class="text-center py-4">No users found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

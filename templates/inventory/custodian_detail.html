@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ custodian.full_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ custodian.full_name }}</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-bordered">
+            <tr>
+                <th>First Name</th>
+                <td>{{ custodian.first_name }}</td>
+            </tr>
+            <tr>
+                <th>Last Name</th>
+                <td>{{ custodian.last_name }}</td>
+            </tr>
+            <tr>
+                <th>Department</th>
+                <td>{{ custodian.department.name|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ custodian.location.name|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ custodian.email|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Phone</th>
+                <td>{{ custodian.phone|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Notes</th>
+                <td>{{ custodian.notes|default:"-" }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<h2>Assigned Printers</h2>
+{% if custodian.printers.all %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Model</th>
+            <th>Serial Number</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for printer in custodian.printers.all %}
+        <tr>
+            <td><a href="{% url 'printer_detail' printer.pk %}">{{ printer.name }}</a></td>
+            <td>{{ printer.printer_model }}</td>
+            <td>{{ printer.serial_number }}</td>
+            <td>{{ printer.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">No printers assigned to this custodian.</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'custodian_update' custodian.pk %}" class="btn btn-warning">Edit</a>
+    <a href="{% url 'custodian_delete' custodian.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'custodian_list' %}" class="btn btn-secondary">Back to List</a>
+</div>
+{% endblock %}

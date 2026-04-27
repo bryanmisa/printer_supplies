@@ -8,11 +8,9 @@
         <h2>Supplies</h2>
         <p>Manage consumable inventory and stock levels</p>
     </div>
-    {% if user.role != 'staff' %}
     <a href="{% url 'supply_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> New Supply
     </a>
-    {% endif %}
 </div>
 
 <form method="get" class="filter-bar">
@@ -20,29 +18,27 @@
             <label>Search</label>
             <input type="text" name="q" class="form-control" placeholder="Name or SKU…" value="{{ request.GET.q }}">
         </div>
-        {% if user.role != 'staff' %}
-        <div class="filter-group">
-            <label>Status</label>
-            <select name="status" class="form-select no-select2">
-                <option value="">All</option>
-                <option value="out_of_stock" {% if request.GET.status == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
-                <option value="low_stock"    {% if request.GET.status == 'low_stock'    %}selected{% endif %}>Low Stock</option>
-                <option value="normal"       {% if request.GET.status == 'normal'       %}selected{% endif %}>Normal</option>
-                <option value="overstock"    {% if request.GET.status == 'overstock'    %}selected{% endif %}>Overstock</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label>Printer Model</label>
-            <select name="printer_model" class="form-select no-select2">
-                <option value="">All Models</option>
-                {% for pm in printer_models %}
-                <option value="{{ pm.id }}" {% if request.GET.printer_model == pm.id|stringformat:"i" %}selected{% endif %}>{{ pm }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        {% endif %}
-        <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-select no-select2">
+            <option value="">All</option>
+            <option value="out_of_stock" {% if request.GET.status == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+            <option value="low_stock"    {% if request.GET.status == 'low_stock'    %}selected{% endif %}>Low Stock</option>
+            <option value="normal"       {% if request.GET.status == 'normal'       %}selected{% endif %}>Normal</option>
+            <option value="overstock"    {% if request.GET.status == 'overstock'    %}selected{% endif %}>Overstock</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Printer Model</label>
+        <select name="printer_model" class="form-select no-select2">
+            <option value="">All Models</option>
+            {% for pm in printer_models %}
+            <option value="{{ pm.id }}" {% if request.GET.printer_model == pm.id|stringformat:"i" %}selected{% endif %}>{{ pm }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
 
 <!-- Table -->
 <div class="table-wrapper">
@@ -98,14 +94,12 @@
                     {% else %}<span class="badge badge-success">Normal</span>{% endif %}
                 </td>
                 <td style="text-align:right; padding-right:24px;">
-                    {% if user.role != 'staff' %}
                     <a href="{% url 'supply_update' supply.pk %}" class="btn btn-ghost btn-sm" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a href="{% url 'supply_delete' supply.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
                         <i class="bi bi-trash"></i>
                     </a>
-                    {% endif %}
                 </td>
             </tr>
             {% empty %}
@@ -115,11 +109,9 @@
                         <div class="empty-icon"><i class="bi bi-archive"></i></div>
                         <h5>No supplies found</h5>
                         <p>Try adjusting your filters or add the first supply item.</p>
-                        {% if user.role != 'staff' %}
                         <a href="{% url 'supply_create' %}" class="btn btn-primary mt-2">
                             <i class="bi bi-plus-lg"></i> Add Supply
                         </a>
-                        {% endif %}
                     </div>
                 </td>
             </tr>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Departments – SuppliesPro{% endblock %}
+{% block page_title %}Departments{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Departments</h2>
+        <p>Manage organizational departments and divisions</p>
+    </div>
+    <a href="{% url 'department_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Department
+    </a>
+</div>
+
+<form method="get" class="filter-bar">
+    <div class="filter-group" style="flex:1;">
+        <label>Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Name or description…" value="{{ request.GET.q }}">
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-select no-select2">
+            <option value="active" {% if request.GET.status != 'all' %}selected{% endif %}>Active</option>
+            <option value="all" {% if request.GET.status == 'all' %}selected{% endif %}>All</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left:24px;">Department</th>
+                <th>Description</th>
+                <th>Printers</th>
+                <th>Custodians</th>
+                <th class="text-end" style="padding-right:24px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for department in departments %}
+            <tr class="{% if not department.is_active %}table-secondary opacity-50{% endif %}">
+                <td style="padding-left:24px;">
+                    <a href="{% url 'department_detail' department.pk %}" style="font-weight:600; color:var(--text-1);">{{ department.name }}</a>
+                </td>
+                <td>{{ department.description|truncatewords:15|default:"—" }}</td>
+                <td><span class="badge badge-primary">{{ department.printers.count }}</span></td>
+                <td><span class="badge badge-secondary">{{ department.custodians.count }}</span></td>
+                <td style="text-align:right; padding-right:24px;">
+                    <a href="{% url 'department_update' department.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="post" action="{% url 'department_toggle' department.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if department.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{{ department.is_active|yesno:'Disable,Enable' }}">
+                            <i class="bi bi-{{ department.is_active|yesno:'toggle-on,toggle-off' }}"></i>
+                        </button>
+                    </form>
+                    <a href="{% url 'department_delete' department.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-building"></i></div>
+                        <h5>No departments found</h5>
+                        <p>Try adjusting your filters or add the first department.</p>
+                        <a href="{% url 'department_create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Add Department
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

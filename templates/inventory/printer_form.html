@@ -15,6 +15,9 @@
 
 <form method="post" novalidate enctype="multipart/form-data">
     {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>
+    {% endif %}
 
     <!-- Section 1: Basic Info -->
     <div class="form-section">
@@ -62,15 +65,37 @@
             <div class="col-md-6">
                 <div class="field-group">
                     <label for="{{ form.custodian.id_for_label }}">Custodian</label>
-                    {{ form.custodian }}
-                    <div class="form-text">The person responsible for this printer.</div>
+                    <div class="d-flex gap-2">
+                        {{ form.custodian }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#custodianModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <div class="form-text">Person responsible OR assign department below.</div>
                     {% if form.custodian.errors %}<div class="invalid-feedback">{{ form.custodian.errors.0 }}</div>{% endif %}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="field-group">
-                    <label for="{{ form.location.id_for_label }}">Physical Location <span style="color:var(--danger);">*</span></label>
-                    {{ form.location }}
+                    <label for="{{ form.department.id_for_label }}">Department <span style="color:var(--text-3); font-weight:400;">(if no custodian)</span></label>
+                    <div class="d-flex gap-2">
+                        {{ form.department }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#departmentModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    {% if form.department.errors %}<div class="invalid-feedback">{{ form.department.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.location.id_for_label }}">Physical Location</label>
+                    <div class="d-flex gap-2">
+                        {{ form.location }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                     <div class="form-text">e.g. Floor 3, Room 302, Reception Desk</div>
                     {% if form.location.errors %}<div class="invalid-feedback">{{ form.location.errors.0 }}</div>{% endif %}
                 </div>
@@ -117,4 +142,9 @@
         </button>
     </div>
 </form>
+
+{% block extra_js %}
+{{ block.super }}
+{% include 'includes/quick_add_modals.html' with departments=departments locations=locations %}
+{% endblock %}
 {% endblock %}

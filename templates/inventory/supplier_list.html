@@ -4,14 +4,12 @@
 
 {% block content %}
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Suppliers</span>
-        {% if user.role != 'staff' %}
-        <a href="{% url 'supplier_create' %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg"></i> Add Supplier
-        </a>
-        {% endif %}
-    </div>
+<div class="card-header d-flex justify-content-between align-items-center">
+    <span>Suppliers</span>
+    <a href="{% url 'supplier_create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> Add Supplier
+    </a>
+</div>
     <div class="card-body p-0">
         <form method="get" class="filter-bar" style="padding: 16px;">
             <div class="filter-group" style="flex:2;">
@@ -48,7 +46,6 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if user.role != 'staff' %}
                         <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-ghost btn-sm" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -65,7 +62,6 @@
                         <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-ghost btn-sm" title="Delete">
                             <i class="bi bi-trash"></i>
                         </a>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

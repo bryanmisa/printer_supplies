@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Locations – SuppliesPro{% endblock %}
+{% block page_title %}Locations{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Locations</h2>
+        <p>Manage physical locations and workspaces</p>
+    </div>
+    <a href="{% url 'location_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Location
+    </a>
+</div>
+
+<form method="get" class="filter-bar">
+    <div class="filter-group" style="flex:1;">
+        <label>Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Name or description…" value="{{ request.GET.q }}">
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-select no-select2">
+            <option value="active" {% if request.GET.status != 'all' %}selected{% endif %}>Active</option>
+            <option value="all" {% if request.GET.status == 'all' %}selected{% endif %}>All</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left:24px;">Location</th>
+                <th>Description</th>
+                <th>Printers</th>
+                <th>Custodians</th>
+                <th class="text-end" style="padding-right:24px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for location in locations %}
+            <tr class="{% if not location.is_active %}table-secondary opacity-50{% endif %}">
+                <td style="padding-left:24px;">
+                    <a href="{% url 'location_detail' location.pk %}" style="font-weight:600; color:var(--text-1);">{{ location.name }}</a>
+                </td>
+                <td>{{ location.description|truncatewords:15|default:"—" }}</td>
+                <td><span class="badge badge-primary">{{ location.printers.count }}</span></td>
+                <td><span class="badge badge-secondary">{{ location.custodians.count }}</span></td>
+                <td style="text-align:right; padding-right:24px;">
+                    <a href="{% url 'location_update' location.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="post" action="{% url 'location_toggle' location.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if location.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{{ location.is_active|yesno:'Disable,Enable' }}">
+                            <i class="bi bi-{{ location.is_active|yesno:'toggle-on,toggle-off' }}"></i>
+                        </button>
+                    </form>
+                    <a href="{% url 'location_delete' location.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-geo-alt"></i></div>
+                        <h5>No locations found</h5>
+                        <p>Try adjusting your filters or add the first location.</p>
+                        <a href="{% url 'location_create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Add Location
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

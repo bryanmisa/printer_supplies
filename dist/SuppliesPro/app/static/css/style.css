@@ -402,9 +402,10 @@ main { padding: 28px 32px; }
   border-radius: var(--radius-lg);
   padding: 22px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 18px;
   transition: all .25s;
+  min-width: 0;
 }
 
 .stat-card:hover {
@@ -429,11 +430,19 @@ main { padding: 28px 32px; }
 .stat-icon.danger  { background: rgba(244,63,94,.15);  color: #fb7185; }
 .stat-icon.info    { background: rgba(56,189,248,.15); color: #7dd3fc; }
 
+.stat-card .stat-info {
+  min-width: 0;
+  flex: 1;
+}
+
 .stat-card .stat-value {
   font-size: 1.8rem;
   font-weight: 800;
   color: var(--text-1);
-  line-height: 1;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .stat-card .stat-label {
@@ -1048,7 +1057,7 @@ textarea.form-control { min-height: 110px; resize: vertical; }
   inset: 0;
   background:
     linear-gradient(135deg, rgba(99,102,241,.6) 0%, rgba(139,92,246,.4) 50%, rgba(6,12,22,.9) 100%),
-    url('https://images.unsplash.com/photo-1586953208448-b95a79798f07?q=80&w=2070&auto=format&fit=crop');
+    url('../images/login-bg.jpg');
   background-size: cover;
   background-position: center;
 }

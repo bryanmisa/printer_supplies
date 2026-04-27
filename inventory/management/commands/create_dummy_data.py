@@ -44,19 +44,17 @@ class Command(BaseCommand):
             manager.save()
             self.stdout.write(f'  Created manager user: manager/manager123')
 
-        staff, created = User.objects.get_or_create(
-            username='staff',
+        # Create a custodian instead of staff user
+        staff_custodian, created = Custodian.objects.get_or_create(
+            first_name='Jane',
+            last_name='Staff',
             defaults={
-                'email': 'staff@example.com',
-                'first_name': 'Jane',
-                'last_name': 'Staff',
-                'role': 'staff',
+                'email': 'jane.staff@example.com',
+                'phone': '555-0105',
             }
         )
         if created:
-            staff.set_password('staff123')
-            staff.save()
-            self.stdout.write(f'  Created staff user: staff/staff123')
+            self.stdout.write(f'  Created custodian: {staff_custodian.full_name}')
 
         suppliers_data = [
             {'name': 'TechSupply Co', 'contact': 'Mike Johnson', 'email': 'mike@techsupply.com', 'phone': '555-0101', 'address': '123 Tech Street, Silicon Valley, CA'},
@@ -148,6 +146,23 @@ class Command(BaseCommand):
                 self.stdout.write(f'  Created supply: {s["name"]} (Stock: {s["stock"]})')
             supplies.append(supply)
 
+        # Create some custodians
+        custodians = []
+        custodian_data = [
+            {'first': 'John', 'last': 'Doe', 'email': 'john.doe@example.com'},
+            {'first': 'Jane', 'last': 'Smith', 'email': 'jane.smith@example.com'},
+            {'first': 'Bob', 'last': 'Johnson', 'email': 'bob.johnson@example.com'},
+        ]
+        for c in custodian_data:
+            custodian, created = Custodian.objects.get_or_create(
+                first_name=c['first'],
+                last_name=c['last'],
+                defaults={'email': c['email']}
+            )
+            custodians.append(custodian)
+            if created:
+                self.stdout.write(f'  Created custodian: {custodian.full_name}')
+
         printers_data = [
             {'name': 'Reception Laser Printer', 'model_idx': 0, 'serial': 'HP-LJ-001', 'location': 'Reception Area', 'status': 'active'},
             {'name': 'Accounting HP Office', 'model_idx': 1, 'serial': 'HP-OJ-001', 'location': 'Accounting Department', 'status': 'active'},
@@ -165,9 +180,9 @@ class Command(BaseCommand):
                 defaults={
                     'name': p['name'],
                     'printer_model': printer_models[p['model_idx']],
-                    'location': p['location'],
+                    'location': random.choice(Location.objects.all()) if Location.objects.exists() else None,
                     'status': p['status'],
-                    'custodian': random.choice([admin, manager, staff]),
+                    'custodian': random.choice(custodians) if custodians else None,
                 }
             )
             if created:
@@ -203,7 +218,7 @@ class Command(BaseCommand):
                         installed = SupplyInstallation.objects.create(
                             printer=printer,
                             supply=supply,
-                            installed_by=random.choice([admin, manager, staff]),
+                            installed_by=random.choice([admin, manager]),
                             installed_at=now - timedelta(days=days_ago),
                         )
                         supply.current_stock -= 1

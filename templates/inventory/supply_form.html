@@ -96,7 +96,12 @@
             <div class="col-md-6">
                 <div class="field-group">
                     <label for="{{ form.supply_type.id_for_label }}">Supply Type</label>
-                    {{ form.supply_type }}
+                    <div class="d-flex gap-2">
+                        {{ form.supply_type }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#supplyTypeModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="col-12">
@@ -158,17 +163,28 @@
             <div class="col-md-6">
                 <div class="field-group">
                     <label for="{{ form.printer_models.id_for_label }}">Compatible Printer Models <span style="color:var(--danger);">*</span></label>
-                    {{ form.printer_models }}
+                    <div class="d-flex gap-2">
+                        {{ form.printer_models }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#printerModelModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                     {% if form.printer_models.errors %}<div class="invalid-feedback d-block">{{ form.printer_models.errors.0 }}</div>{% endif %}
                     <div class="form-text">Hold Ctrl / Cmd to select multiple models.</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="field-group">
-                    <label for="{{ form.suppliers.id_for_label }}">Approved Suppliers <span style="color:var(--danger);">*</span></label>
-                    {{ form.suppliers }}
+                    <label for="{{ form.suppliers.id_for_label }}">Approved Suppliers <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    <div class="d-flex gap-2">
+                        {{ form.suppliers }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#supplierModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                     <div class="form-text">Authorised vendors who can supply this item.</div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -254,4 +270,5 @@ function closeDuplicateModal() {
 }
 </script>
 {% endblock %}
+{% include 'includes/quick_add_modals.html' with departments=departments locations=locations %}
 {% endblock %}

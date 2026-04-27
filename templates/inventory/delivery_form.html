@@ -10,12 +10,17 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Supplier *</label>
-                <select name="supplier" id="id_supplier" class="form-select select2-supplier" required onchange="loadPastDeliveries()">
-                    <option value="">Select Supplier</option>
-                    {% for supplier in suppliers %}
-                    <option value="{{ supplier.id }}">{{ supplier.name }}</option>
-                    {% endfor %}
-                </select>
+                <div class="d-flex gap-2">
+                    <select name="supplier" id="id_supplier" class="form-select select2-supplier" required onchange="loadPastDeliveries()">
+                        <option value="">Select Supplier</option>
+                        {% for supplier in suppliers %}
+                        <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#supplierModal">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Delivery Date *</label>
@@ -118,7 +123,7 @@
             theme: 'bootstrap-5',
             width: '100%',
             placeholder: $(selector).data('placeholder') || 'Select...',
-            closeOnSelect: false
+            closeOnSelect: false,
         });
     }
     
@@ -178,3 +183,4 @@
     }
 </script>
 {% endblock %}
+{% include 'includes/quick_add_modals.html' with departments=departments locations=locations %}

@@ -1,0 +1,110 @@
+<!-- Quick Add Modal Template -->
+<!-- Usage: {% include 'includes/quick_add_modal.html' with modal_id='custodianModal' label='Custodian' form=forms.CustodianForm %} -->
+
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-plus-circle-fill me-2" style="color: var(--primary);"></i>
+                    Add New {{ label }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="{{ modal_id }}_form" onsubmit="submitQuickAdd(event, '{{ modal_id }}', '{% url 'api_quick_add' model_name=label.lower %}')">
+                <div class="modal-body">
+                    <div id="{{ modal_id }}_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="{{ modal_id }}_first_name" class="form-label" style="color: var(--text-1);">First Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="first_name" id="{{ modal_id }}_first_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ modal_id }}_last_name" class="form-label" style="color: var(--text-1);">Last Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="last_name" id="{{ modal_id }}_last_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3" id="{{ modal_id }}_department_field">
+                        <label for="{{ modal_id }}_department" class="form-label" style="color: var(--text-1);">Department</label>
+                        <select name="department" id="{{ modal_id }}_department" class="form-select">
+                            <option value="">-- Select Department --</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3" id="{{ modal_id }}_location_field">
+                        <label for="{{ modal_id }}_location" class="form-label" style="color: var(--text-1);">Location</label>
+                        <select name="location" id="{{ modal_id }}_location" class="form-select">
+                            <option value="">-- Select Location --</option>
+                            {% for loc in locations %}
+                            <option value="{{ loc.id }}">{{ loc.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ modal_id }}_email" class="form-label" style="color: var(--text-1);">Email</label>
+                        <input type="email" name="email" id="{{ modal_id }}_email" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ modal_id }}_phone" class="form-label" style="color: var(--text-1);">Phone</label>
+                        <input type="text" name="phone" id="{{ modal_id }}_phone" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save {{ label }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitQuickAdd(event, modalId, url) {
+    event.preventDefault();
+    const form = document.getElementById(modalId + '_form');
+    const errorDiv = document.getElementById(modalId + '_error');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+            modal.hide();
+            // Refresh the page to show the new item in select
+            location.reload();
+        } else {
+            errorDiv.textContent = data.error || 'An error occurred';
+            errorDiv.classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        errorDiv.textContent = 'An error occurred: ' + error;
+        errorDiv.classList.remove('d-none');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>

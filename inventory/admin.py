@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from .models import (
     User, Supplier, SupplyType, PrinterModel, Printer, Supply,
-    Delivery, DeliveryItem, SupplyInstallation, AuditLog
+    Delivery, DeliveryItem, SupplyInstallation, AuditLog,
+    Department, Location, Custodian
 )
 
 
@@ -21,7 +22,7 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['username', 'email', 'first_name', 'last_name']
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name', 'email', 'phone', 'department')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'email', 'phone')}),
         ('Permissions', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
@@ -47,7 +48,7 @@ class PrinterModelAdmin(admin.ModelAdmin):
 
 class PrinterAdmin(admin.ModelAdmin):
     list_display = ['name', 'printer_model', 'serial_number', 'custodian', 'status', 'location']
-    list_filter = ['status']
+    list_filter = ['status', 'custodian', 'department', 'location']
     search_fields = ['name', 'serial_number']
 
 
@@ -92,4 +93,7 @@ admin_site.register(Delivery, DeliveryAdmin)
 admin_site.register(DeliveryItem, DeliveryItemAdmin)
 admin_site.register(SupplyInstallation, SupplyInstallationAdmin)
 admin_site.register(AuditLog, AuditLogAdmin)
+admin_site.register(Department, admin.ModelAdmin)
+admin_site.register(Location, admin.ModelAdmin)
+admin_site.register(Custodian, admin.ModelAdmin)
 admin_site.register(Group)

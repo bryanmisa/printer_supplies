@@ -25,11 +25,12 @@ from rbac.decorators import require_permission, require_role, admin_required
 
 from .forms import (
     UserCreationForm, SupplierForm, PrinterModelForm, PrinterForm,
-    SupplyForm, SupplyTypeForm, DeliveryForm, DeliveryItemForm, InstallationForm, DisposalForm
+    SupplyForm, SupplyTypeForm, DeliveryForm, DeliveryItemForm, InstallationForm, DisposalForm,
+    DepartmentForm, LocationForm, CustodianForm
 )
 from .models import (
     Supply, Printer, PrinterModel, Supplier, SupplyType, Delivery, DeliveryItem,
-    SupplyInstallation, AuditLog, User
+    SupplyInstallation, AuditLog, User, Department, Location, Custodian
 )
 
 
@@ -168,36 +169,26 @@ class SupplyListView(LoginRequiredMixin, ListView):
         if supplier:
             queryset = queryset.filter(suppliers_id=supplier)
 
-        if self.request.user.role == 'staff':
-            staff_printers = Printer.objects.filter(custodian=self.request.user)
-            staff_printer_models = staff_printers.values_list('printer_model_id', flat=True)
-            queryset = queryset.filter(printer_models__id__in=staff_printer_models).distinct()
-
         return queryset.select_related()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.role == 'staff':
-            context['printer_models'] = PrinterModel.objects.filter(
-                id__in=Printer.objects.filter(custodian=self.request.user).values_list('printer_model_id', flat=True)
-            )
-            context['suppliers'] = Supplier.objects.none()
-        else:
-            context['printer_models'] = PrinterModel.objects.all()
-            context['suppliers'] = Supplier.objects.filter(is_active=True)
+        context['printer_models'] = PrinterModel.objects.all()
+        context['suppliers'] = Supplier.objects.filter(is_active=True)
         return context
 
 
 class SupplyCreateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to create supplies.')
-            return redirect('supply_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         form = SupplyForm()
-        return render(request, 'inventory/supply_form.html', {'form': form})
+        return render(request, 'inventory/supply_form.html', {
+            'form': form,
+            'departments': Department.objects.all(),
+            'locations': Location.objects.all(),
+        })
 
     def post(self, request):
         form = SupplyForm(request.POST, request.FILES)
@@ -206,7 +197,11 @@ class SupplyCreateView(LoginRequiredMixin, View):
             messages.success(request, 'Supply created successfully.')
             log_audit(request.user, 'create', supply, {'action': 'created'})
             return redirect('supply_list')
-        return render(request, 'inventory/supply_form.html', {'form': form})
+        return render(request, 'inventory/supply_form.html', {
+            'form': form,
+            'departments': Department.objects.all(),
+            'locations': Location.objects.all(),
+        })
 
 
 class SupplyUpdateView(LoginRequiredMixin, View):
@@ -214,15 +209,17 @@ class SupplyUpdateView(LoginRequiredMixin, View):
     form_class = SupplyForm
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to edit supplies.')
-            return redirect('supply_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
         supply = get_object_or_404(Supply, pk=pk)
         form = SupplyForm(instance=supply)
-        return render(request, 'inventory/supply_form.html', {'form': form, 'object': supply})
+        return render(request, 'inventory/supply_form.html', {
+            'form': form,
+            'object': supply,
+            'departments': Department.objects.all(),
+            'locations': Location.objects.all(),
+        })
 
     def post(self, request, pk):
         supply = get_object_or_404(Supply, pk=pk)
@@ -232,7 +229,12 @@ class SupplyUpdateView(LoginRequiredMixin, View):
             messages.success(request, 'Supply updated successfully.')
             log_audit(request.user, 'update', supply, {'action': 'updated'})
             return redirect('supply_list')
-        return render(request, 'inventory/supply_form.html', {'form': form, 'object': supply})
+        return render(request, 'inventory/supply_form.html', {
+            'form': form,
+            'object': supply,
+            'departments': Department.objects.all(),
+            'locations': Location.objects.all(),
+        })
 
 
 class SupplyDeleteView(LoginRequiredMixin, View):
@@ -240,9 +242,6 @@ class SupplyDeleteView(LoginRequiredMixin, View):
     template_name = 'inventory/supply_confirm_delete.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to delete supplies.')
-            return redirect('supply_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -320,9 +319,6 @@ class SupplierDetailView(LoginRequiredMixin, DetailView):
 
 class SupplierCreateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to create suppliers.')
-            return redirect('supplier_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -341,9 +337,6 @@ class SupplierCreateView(LoginRequiredMixin, View):
 
 class SupplierUpdateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to edit suppliers.')
-            return redirect('supplier_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -364,9 +357,6 @@ class SupplierUpdateView(LoginRequiredMixin, View):
 
 class SupplierDeleteView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to delete suppliers.')
-            return redirect('supplier_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -384,9 +374,6 @@ class SupplierDeleteView(LoginRequiredMixin, View):
 
 @login_required
 def supplier_toggle_active(request, pk):
-    if request.user.role == 'staff':
-        messages.error(request, 'You do not have permission to toggle supplier status.')
-        return redirect('supplier_list')
     supplier = get_object_or_404(Supplier, pk=pk)
     supplier.is_active = not supplier.is_active
     supplier.save()
@@ -416,30 +403,21 @@ class PrinterListView(LoginRequiredMixin, ListView):
         if custodian:
             queryset = queryset.filter(custodian_id=custodian)
 
-        if self.request.user.role == 'staff':
-            queryset = queryset.filter(custodian=self.request.user)
-
-        return queryset.select_related('printer_model', 'custodian')
+        return queryset.select_related('printer_model', 'custodian', 'department', 'location')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.role != 'staff':
-            context['users'] = User.objects.all()
-        else:
-            context['users'] = User.objects.filter(pk=self.request.user.pk)
+        context['custodians'] = Custodian.objects.all()
         return context
 
 
 class PrinterCreateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to create printers.')
-            return redirect('printer_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         form = PrinterForm()
-        return render(request, 'inventory/printer_form.html', {'form': form})
+        return render(request, 'inventory/printer_form.html', {'form': form, 'departments': Department.objects.all(), 'locations': Location.objects.all()})
 
     def post(self, request):
         form = PrinterForm(request.POST, request.FILES)
@@ -448,20 +426,17 @@ class PrinterCreateView(LoginRequiredMixin, View):
             messages.success(request, 'Printer created successfully.')
             log_audit(request.user, 'create', printer, {'action': 'created'})
             return redirect('printer_list')
-        return render(request, 'inventory/printer_form.html', {'form': form})
+        return render(request, 'inventory/printer_form.html', {'form': form, 'departments': Department.objects.all(), 'locations': Location.objects.all()})
 
 
 class PrinterUpdateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to edit printers.')
-            return redirect('printer_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
         printer = get_object_or_404(Printer, pk=pk)
         form = PrinterForm(instance=printer)
-        return render(request, 'inventory/printer_form.html', {'form': form, 'object': printer})
+        return render(request, 'inventory/printer_form.html', {'form': form, 'object': printer, 'departments': Department.objects.all(), 'locations': Location.objects.all()})
 
     def post(self, request, pk):
         printer = get_object_or_404(Printer, pk=pk)
@@ -471,14 +446,11 @@ class PrinterUpdateView(LoginRequiredMixin, View):
             messages.success(request, 'Printer updated successfully.')
             log_audit(request.user, 'update', printer, {'action': 'updated'})
             return redirect('printer_list')
-        return render(request, 'inventory/printer_form.html', {'form': form, 'object': printer})
+        return render(request, 'inventory/printer_form.html', {'form': form, 'object': printer, 'departments': Department.objects.all(), 'locations': Location.objects.all()})
 
 
 class PrinterDeleteView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to delete printers.')
-            return redirect('printer_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -522,7 +494,31 @@ class PrinterDetailView(LoginRequiredMixin, DetailView):
 class PrinterModelListView(LoginRequiredMixin, ListView):
     model = PrinterModel
     template_name = 'inventory/printer_model_list.html'
+    paginate_by = 20
     context_object_name = 'printer_models'
+
+    def get_queryset(self):
+        queryset = PrinterModel.objects.all()
+        query = self.request.GET.get('q')
+        manufacturer = self.request.GET.get('manufacturer')
+        status = self.request.GET.get('status')
+
+        if status != 'all':
+            queryset = queryset.filter(is_active=True)
+
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(manufacturer__icontains=query)
+            )
+        if manufacturer:
+            queryset = queryset.filter(manufacturer__icontains=manufacturer)
+
+        return queryset.prefetch_related('printers', 'supplies')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['manufacturers'] = PrinterModel.objects.values_list('manufacturer', flat=True).distinct().order_by('manufacturer')
+        return context
 
 
 class PrinterModelDetailView(LoginRequiredMixin, DetailView):
@@ -533,9 +529,6 @@ class PrinterModelDetailView(LoginRequiredMixin, DetailView):
 
 class PrinterModelCreateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to create printer models.')
-            return redirect('printer_model_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -553,9 +546,6 @@ class PrinterModelCreateView(LoginRequiredMixin, View):
 
 class PrinterModelUpdateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to edit printer models.')
-            return redirect('printer_model_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -571,6 +561,30 @@ class PrinterModelUpdateView(LoginRequiredMixin, View):
             messages.success(request, 'Printer model updated successfully.')
             return redirect('printer_model_list')
         return render(request, 'inventory/printer_model_form.html', {'form': form, 'object': model})
+
+
+class PrinterModelDeleteView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        model = get_object_or_404(PrinterModel, pk=pk)
+        return render(request, 'inventory/printer_model_confirm_delete.html', {'printer_model': model})
+
+    def post(self, request, pk):
+        model = get_object_or_404(PrinterModel, pk=pk)
+        model.printers.update(printer_model=None)
+        model.delete()
+        messages.success(request, 'Printer model deleted successfully.')
+        log_audit(request.user, 'delete', model, {'action': 'deleted', 'printers_unlinked': True})
+        return redirect('printer_model_list')
+
+
+class PrinterModelToggleView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        model = get_object_or_404(PrinterModel, pk=pk)
+        model.is_active = not model.is_active
+        model.save()
+        status = 'enabled' if model.is_active else 'disabled'
+        messages.success(request, f'Printer model {status} successfully.')
+        return redirect('printer_model_list')
 
 
 class DeliveryListView(LoginRequiredMixin, ListView):
@@ -602,9 +616,6 @@ class DeliveryCreateView(LoginRequiredMixin, View):
     template_name = 'inventory/delivery_form.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to create deliveries.')
-            return redirect('delivery_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -632,7 +643,9 @@ class DeliveryCreateView(LoginRequiredMixin, View):
             'suppliers': Supplier.objects.all(),
             'all_supplies': all_supplies,
             'all_supplies_json': all_supplies_json,
-            'today': datetime.now().strftime('%Y-%m-%d')
+            'today': datetime.now().strftime('%Y-%m-%d'),
+            'departments': Department.objects.all(),
+            'locations': Location.objects.all(),
         })
 
     def post(self, request):
@@ -1307,7 +1320,7 @@ def consumption_report(request):
         'chart_labels': json.dumps(labels),
         'chart_data': json.dumps(counts),
         'months': months,
-        'custodians': User.objects.filter(printers__isnull=False).distinct(),
+        'custodians': Custodian.objects.filter(printers__isnull=False).distinct(),
     }
     return render(request, 'inventory/consumption_report.html', context)
 
@@ -1380,9 +1393,6 @@ class SupplyTypeListView(LoginRequiredMixin, ListView):
 
 class SupplyTypeCreateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to create supply types.')
-            return redirect('supply_type_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -1400,9 +1410,6 @@ class SupplyTypeCreateView(LoginRequiredMixin, View):
 
 class SupplyTypeUpdateView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to edit supply types.')
-            return redirect('supply_type_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -1422,9 +1429,6 @@ class SupplyTypeUpdateView(LoginRequiredMixin, View):
 
 class SupplyTypeDeleteView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.role == 'staff':
-            messages.error(request, 'You do not have permission to delete supply types.')
-            return redirect('supply_type_list')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
@@ -1720,3 +1724,345 @@ def database_backup(request):
         'backups': backups,
     }
     return render(request, 'inventory/database_backup.html', context)
+
+# Department Views
+class DepartmentListView(LoginRequiredMixin, ListView):
+    model = Department
+    template_name = 'inventory/department_list.html'
+    paginate_by = 20
+    context_object_name = 'departments'
+
+    def get_queryset(self):
+        queryset = Department.objects.all()
+        query = self.request.GET.get('q')
+        status = self.request.GET.get('status')
+
+        if status != 'all':
+            queryset = queryset.filter(is_active=True)
+
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )
+        return queryset.prefetch_related('printers', 'custodians')
+
+
+class DepartmentDetailView(LoginRequiredMixin, DetailView):
+    model = Department
+    template_name = 'inventory/department_detail.html'
+    context_object_name = 'department'
+
+
+class DepartmentCreateView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = DepartmentForm()
+        return render(request, 'inventory/department_form.html', {'form': form})
+
+    def post(self, request):
+        form = DepartmentForm(request.POST)
+        if form.is_valid():
+            department = form.save()
+            messages.success(request, 'Department created successfully.')
+            log_audit(request.user, 'create', department, {'action': 'created'})
+            return redirect('department_list')
+        return render(request, 'inventory/department_form.html', {'form': form})
+
+
+class DepartmentUpdateView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        department = get_object_or_404(Department, pk=pk)
+        form = DepartmentForm(instance=department)
+        return render(request, 'inventory/department_form.html', {'form': form, 'object': department})
+
+    def post(self, request, pk):
+        department = get_object_or_404(Department, pk=pk)
+        form = DepartmentForm(request.POST, instance=department)
+        if form.is_valid():
+            department = form.save()
+            messages.success(request, 'Department updated successfully.')
+            log_audit(request.user, 'update', department, {'action': 'updated'})
+            return redirect('department_list')
+        return render(request, 'inventory/department_form.html', {'form': form, 'object': department})
+
+
+class DepartmentDeleteView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        department = get_object_or_404(Department, pk=pk)
+        return render(request, 'inventory/department_confirm_delete.html', {'department': department})
+
+    def post(self, request, pk):
+        department = get_object_or_404(Department, pk=pk)
+        department.delete()
+        messages.success(request, 'Department deleted successfully.')
+        log_audit(request.user, 'delete', department, {'action': 'deleted'})
+        return redirect('department_list')
+
+
+class DepartmentToggleView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        department = get_object_or_404(Department, pk=pk)
+        department.is_active = not department.is_active
+        department.save()
+        status = 'enabled' if department.is_active else 'disabled'
+        messages.success(request, f'Department {status} successfully.')
+        return redirect('department_list')
+
+
+# Location Views
+class LocationListView(LoginRequiredMixin, ListView):
+    model = Location
+    template_name = 'inventory/location_list.html'
+    paginate_by = 20
+    context_object_name = 'locations'
+
+    def get_queryset(self):
+        queryset = Location.objects.all()
+        query = self.request.GET.get('q')
+        status = self.request.GET.get('status')
+
+        if status != 'all':
+            queryset = queryset.filter(is_active=True)
+
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )
+        return queryset.prefetch_related('printers', 'custodians')
+
+
+class LocationDetailView(LoginRequiredMixin, DetailView):
+    model = Location
+    template_name = 'inventory/location_detail.html'
+    context_object_name = 'location'
+
+
+class LocationCreateView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = LocationForm()
+        return render(request, 'inventory/location_form.html', {'form': form})
+
+    def post(self, request):
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            location = form.save()
+            messages.success(request, 'Location created successfully.')
+            log_audit(request.user, 'create', location, {'action': 'created'})
+            return redirect('location_list')
+        return render(request, 'inventory/location_form.html', {'form': form})
+
+
+class LocationUpdateView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        location = get_object_or_404(Location, pk=pk)
+        form = LocationForm(instance=location)
+        return render(request, 'inventory/location_form.html', {'form': form, 'object': location})
+
+    def post(self, request, pk):
+        location = get_object_or_404(Location, pk=pk)
+        form = LocationForm(request.POST, instance=location)
+        if form.is_valid():
+            location = form.save()
+            messages.success(request, 'Location updated successfully.')
+            log_audit(request.user, 'update', location, {'action': 'updated'})
+            return redirect('location_list')
+        return render(request, 'inventory/location_form.html', {'form': form, 'object': location})
+
+
+class LocationDeleteView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        location = get_object_or_404(Location, pk=pk)
+        return render(request, 'inventory/location_confirm_delete.html', {'location': location})
+
+    def post(self, request, pk):
+        location = get_object_or_404(Location, pk=pk)
+        location.delete()
+        messages.success(request, 'Location deleted successfully.')
+        log_audit(request.user, 'delete', location, {'action': 'deleted'})
+        return redirect('location_list')
+
+
+class LocationToggleView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        location = get_object_or_404(Location, pk=pk)
+        location.is_active = not location.is_active
+        location.save()
+        status = 'enabled' if location.is_active else 'disabled'
+        messages.success(request, f'Location {status} successfully.')
+        return redirect('location_list')
+
+
+# Custodian Views
+class CustodianListView(LoginRequiredMixin, ListView):
+    model = Custodian
+    template_name = 'inventory/custodian_list.html'
+    paginate_by = 20
+    context_object_name = 'custodians'
+
+    def get_queryset(self):
+        queryset = Custodian.objects.all()
+        query = self.request.GET.get('q')
+        department = self.request.GET.get('department')
+        location = self.request.GET.get('location')
+        status = self.request.GET.get('status')
+
+        if status != 'all':
+            queryset = queryset.filter(is_active=True)
+
+        if query:
+            queryset = queryset.filter(
+                Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query)
+            )
+        if department:
+            queryset = queryset.filter(department_id=department)
+        if location:
+            queryset = queryset.filter(location_id=location)
+
+        return queryset.select_related('department', 'location')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['departments'] = Department.objects.all()
+        context['locations'] = Location.objects.all()
+        return context
+
+
+class CustodianCreateView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = CustodianForm()
+        return render(request, 'inventory/custodian_form.html', {'form': form})
+
+    def post(self, request):
+        form = CustodianForm(request.POST)
+        if form.is_valid():
+            custodian = form.save()
+            messages.success(request, 'Custodian created successfully.')
+            log_audit(request.user, 'create', custodian, {'action': 'created'})
+            return redirect('custodian_list')
+        return render(request, 'inventory/custodian_form.html', {'form': form})
+
+
+class CustodianUpdateView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        custodian = get_object_or_404(Custodian, pk=pk)
+        form = CustodianForm(instance=custodian)
+        return render(request, 'inventory/custodian_form.html', {'form': form, 'object': custodian})
+
+    def post(self, request, pk):
+        custodian = get_object_or_404(Custodian, pk=pk)
+        form = CustodianForm(request.POST, instance=custodian)
+        if form.is_valid():
+            custodian = form.save()
+            messages.success(request, 'Custodian updated successfully.')
+            log_audit(request.user, 'update', custodian, {'action': 'updated'})
+            return redirect('custodian_list')
+        return render(request, 'inventory/custodian_form.html', {'form': form, 'object': custodian})
+
+
+class CustodianDeleteView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        custodian = get_object_or_404(Custodian, pk=pk)
+        return render(request, 'inventory/custodian_confirm_delete.html', {'custodian': custodian})
+
+    def post(self, request, pk):
+        custodian = get_object_or_404(Custodian, pk=pk)
+        custodian.delete()
+        messages.success(request, 'Custodian deleted successfully.')
+        log_audit(request.user, 'delete', custodian, {'action': 'deleted'})
+        return redirect('custodian_list')
+
+
+class CustodianToggleView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        custodian = get_object_or_404(Custodian, pk=pk)
+        custodian.is_active = not custodian.is_active
+        custodian.save()
+        status = 'enabled' if custodian.is_active else 'disabled'
+        messages.success(request, f'Custodian {status} successfully.')
+        return redirect('custodian_list')
+
+
+class CustodianDetailView(LoginRequiredMixin, DetailView):
+    model = Custodian
+    template_name = 'inventory/custodian_detail.html'
+    context_object_name = 'custodian'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        custodian = self.object
+        context['printers'] = Printer.objects.filter(custodian=custodian)
+        return context
+
+@login_required
+def api_quick_add(request, model_name):
+    from django.http import JsonResponse
+    from django.contrib.auth.decorators import permission_required
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    
+    data = json.loads(request.body)
+    
+    try:
+        if model_name == 'custodian':
+            custodian = Custodian.objects.create(
+                first_name=data.get('first_name', ''),
+                last_name=data.get('last_name', ''),
+                email=data.get('email', ''),
+                phone=data.get('phone', ''),
+                department_id=data.get('department') or None,
+                location_id=data.get('location') or None,
+            )
+            return JsonResponse({'success': True, 'id': custodian.id, 'name': str(custodian)})
+        
+        elif model_name == 'department':
+            dept, created = Department.objects.get_or_create(
+                name=data.get('name', ''),
+                defaults={'description': data.get('description', '')}
+            )
+            if not created:
+                return JsonResponse({'success': False, 'error': 'Department already exists'})
+            return JsonResponse({'success': True, 'id': dept.id, 'name': dept.name})
+        
+        elif model_name == 'location':
+            loc, created = Location.objects.get_or_create(
+                name=data.get('name', ''),
+                defaults={'description': data.get('description', '')}
+            )
+            if not created:
+                return JsonResponse({'success': False, 'error': 'Location already exists'})
+            return JsonResponse({'success': True, 'id': loc.id, 'name': loc.name})
+        
+        elif model_name == 'supplier':
+            supplier = Supplier.objects.create(
+                name=data.get('name', ''),
+                contact_name=data.get('contact_name', ''),
+                email=data.get('email', ''),
+                phone=data.get('phone', ''),
+                address=data.get('address', ''),
+            )
+            return JsonResponse({'success': True, 'id': supplier.id, 'name': supplier.name})
+        
+        elif model_name == 'supplytype':
+            supply_type, created = SupplyType.objects.get_or_create(
+                name=data.get('name', ''),
+                defaults={'description': data.get('description', '')}
+            )
+            if not created:
+                return JsonResponse({'success': False, 'error': 'Supply type already exists'})
+            return JsonResponse({'success': True, 'id': supply_type.id, 'name': supply_type.name})
+        
+        elif model_name == 'printermodel':
+            model, created = PrinterModel.objects.get_or_create(
+                name=data.get('name', ''),
+                manufacturer=data.get('manufacturer', ''),
+                defaults={'description': data.get('description', '')}
+            )
+            if not created:
+                return JsonResponse({'success': False, 'error': 'Printer model already exists'})
+            return JsonResponse({'success': True, 'id': model.id, 'name': str(model)})
+        
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid model'})
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

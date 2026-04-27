@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit Location{% else %}New Location{% endif %} – SuppliesPro{% endblock %}
+{% block page_title %}{% if object %}Edit Location{% else %}Add Location{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{% if object %}Edit Location{% else %}New Location{% endif %}</h2>
+        <p>{% if object %}Update location details{% else %}Add a new location to the system{% endif %}</p>
+    </div>
+    <a href="{% url 'location_list' %}" class="btn btn-ghost">
+        <i class="bi bi-arrow-left"></i> Back to Locations
+    </a>
+</div>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-geo-alt-fill"></i> Location Information
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.name.id_for_label }}">Name <span style="color:var(--danger);">*</span></label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="field-group mt-3">
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="invalid-feedback">{{ form.description.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-toggle-on"></i> Status
+        </div>
+        <div class="field-group">
+            <div class="form-check">
+                {{ form.is_active }}
+                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                    Active
+                </label>
+            </div>
+            <div class="form-text">Inactive locations won't appear in dropdown lists</div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 justify-content-between">
+        <a href="{% url 'location_list' %}" class="btn btn-ghost">
+            <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-lg"></i>
+            {% if object %}Save Changes{% else %}Add Location{% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}
