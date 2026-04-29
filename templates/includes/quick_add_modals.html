@@ -9,7 +9,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="custodianModal_form" onsubmit="submitQuickAdd(event, 'custodianModal', '{% url "api_quick_add" model_name="custodian" %}')">
+            <form id="custodianModal_form">
                 <div class="modal-body">
                     <div id="custodianModal_error" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
@@ -67,7 +67,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="departmentModal_form" onsubmit="submitQuickAdd(event, 'departmentModal', '{% url "api_quick_add" model_name="department" %}')">
+            <form id="departmentModal_form">
                 <div class="modal-body">
                     <div id="departmentModal_error" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
@@ -99,7 +99,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="locationModal_form" onsubmit="submitQuickAdd(event, 'locationModal', '{% url "api_quick_add" model_name="location" %}')">
+            <form id="locationModal_form">
                 <div class="modal-body">
                     <div id="locationModal_error" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
@@ -131,7 +131,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="supplierModal_form" onsubmit="submitQuickAdd(event, 'supplierModal', '{% url "api_quick_add" model_name="supplier" %}')">
+            <form id="supplierModal_form">
                 <div class="modal-body">
                     <div id="supplierModal_error" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
@@ -175,7 +175,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="supplyTypeModal_form" onsubmit="submitQuickAdd(event, 'supplyTypeModal', '{% url "api_quick_add" model_name="supplytype" %}')">
+            <form id="supplyTypeModal_form">
                 <div class="modal-body">
                     <div id="supplyTypeModal_error" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
@@ -207,7 +207,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="printerModelModal_form" onsubmit="submitQuickAdd(event, 'printerModelModal', '{% url "api_quick_add" model_name="printermodel" %}')">
+            <form id="printerModelModal_form">
                 <div class="modal-body">
                     <div id="printerModelModal_error" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
@@ -233,82 +233,86 @@
 </div>
 
 <script>
-function submitQuickAdd(e, modalId, url) {
-    if (e) e.preventDefault();
-    const form = document.getElementById(modalId + '_form');
-    const errorDiv = document.getElementById(modalId + '_error');
-    if (!form || !errorDiv) return;
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.cookie.split('csrftoken=')[1]?.split(';')[0] || '';
+}
 
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+const apiUrls = {
+    'custodianModal': '{% url "api_quick_add" model_name="custodian" %}',
+    'departmentModal': '{% url "api_quick_add" model_name="department" %}',
+    'locationModal': '{% url "api_quick_add" model_name="location" %}',
+    'supplierModal': '{% url "api_quick_add" model_name="supplier" %}',
+    'supplyTypeModal': '{% url "api_quick_add" model_name="supplytype" %}',
+    'printerModelModal': '{% url "api_quick_add" model_name="printermodel" %}'
+};
 
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
-            if (modal) modal.hide();
-
-            const selectMap = {
-                'custodianModal': ['id_custodian'],
-                'departmentModal': ['id_department'],
-                'locationModal': ['id_location'],
-                'supplierModal': ['id_supplier', 'id_suppliers'],
-                'supplyTypeModal': ['id_supply_type'],
-                'printerModelModal': ['id_printer_models']
-            };
-
-            const selectIds = selectMap[modalId] || [];
-            selectIds.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                if (select) {
-                    const option = document.createElement('option');
-                    option.value = result.id;
-                    option.text = result.name || 'New Item';
-                    option.selected = true;
-                    select.appendChild(option);
-
-                    if ($(select).data('select2')) {
+document.querySelectorAll('.modal form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const modalId = form.id.replace('_form', '');
+        const url = apiUrls[modalId];
+        const errorDiv = document.getElementById(modalId + '_error');
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                if (modal) modal.hide();
+                
+                const selectMap = {
+                    'custodianModal': 'id_custodian',
+                    'departmentModal': 'id_department',
+                    'locationModal': 'id_location',
+                    'supplierModal': ['id_supplier', 'id_suppliers'],
+                    'supplyTypeModal': 'id_supply_type',
+                    'printerModelModal': 'id_printer_models'
+                };
+                
+                const selectIds = selectMap[modalId];
+                const targets = Array.isArray(selectIds) ? selectIds : [selectIds];
+                targets.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    if (select) {
+                        const option = document.createElement('option');
+                        option.value = result.id;
+                        option.text = result.name || 'New Item';
+                        option.selected = true;
+                        select.appendChild(option);
                         $(select).trigger('change.select2');
                     }
+                });
+                
+                form.reset();
+                if (errorDiv) errorDiv.classList.add('d-none');
+            } else {
+                if (errorDiv) {
+                    errorDiv.textContent = result.error || 'An error occurred';
+                    errorDiv.classList.remove('d-none');
                 }
-            });
-
-            form.reset();
-        } else {
-            errorDiv.textContent = result.error || 'An error occurred';
-            errorDiv.classList.remove('d-none');
-        }
-    })
-    .catch(error => {
-        errorDiv.textContent = 'An error occurred: ' + error;
-        errorDiv.classList.remove('d-none');
-    });
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
             }
-        }
-    }
-    return cookieValue;
-}
+        })
+        .catch(error => {
+            if (errorDiv) {
+                errorDiv.textContent = 'An error occurred: ' + error;
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    });
+});
 
-// Initialize Select2 on modal dropdowns when shown
 document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('shown.bs.modal', function() {
         $(this).find('.select2-select').each(function() {

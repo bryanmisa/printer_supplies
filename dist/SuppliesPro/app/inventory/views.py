@@ -18,6 +18,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.html import format_html
+from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
@@ -1991,9 +1992,9 @@ class CustodianDetailView(LoginRequiredMixin, DetailView):
         return context
 
 @login_required
+@csrf_exempt
 def api_quick_add(request, model_name):
     from django.http import JsonResponse
-    from django.contrib.auth.decorators import permission_required
     
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})

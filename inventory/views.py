@@ -18,6 +18,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.html import format_html
+from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
@@ -323,6 +324,8 @@ class SupplierCreateView(LoginRequiredMixin, View):
 
     def get(self, request):
         form = SupplierForm()
+        if request.GET.get('modal'):
+            return render(request, 'inventory/supplier_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/supplier_form.html', {'form': form})
 
     def post(self, request):
@@ -331,7 +334,15 @@ class SupplierCreateView(LoginRequiredMixin, View):
             supplier = form.save()
             messages.success(request, 'Supplier created successfully.')
             log_audit(request.user, 'create', supplier, {'action': 'created'})
+            
+            if request.POST.get('modal'):
+                next_url = request.POST.get('next', reverse('supplier_list'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'pk': supplier.pk, 'name': supplier.name, 'next': next_url})
+                return redirect(next_url + '?created=' + str(supplier.pk))
             return redirect('supplier_list')
+        if request.POST.get('modal'):
+            return render(request, 'inventory/supplier_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/supplier_form.html', {'form': form})
 
 
@@ -533,14 +544,24 @@ class PrinterModelCreateView(LoginRequiredMixin, View):
 
     def get(self, request):
         form = PrinterModelForm()
+        if request.GET.get('modal'):
+            return render(request, 'inventory/printer_model_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/printer_model_form.html', {'form': form})
 
     def post(self, request):
         form = PrinterModelForm(request.POST)
         if form.is_valid():
-            form.save()
+            printer_model = form.save()
             messages.success(request, 'Printer model created successfully.')
+            
+            if request.POST.get('modal'):
+                next_url = request.POST.get('next', reverse('printer_model_list'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'pk': printer_model.pk, 'name': str(printer_model), 'next': next_url})
+                return redirect(next_url + '?created=' + str(printer_model.pk))
             return redirect('printer_model_list')
+        if request.POST.get('modal'):
+            return render(request, 'inventory/printer_model_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/printer_model_form.html', {'form': form})
 
 
@@ -571,9 +592,9 @@ class PrinterModelDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         model = get_object_or_404(PrinterModel, pk=pk)
         model.printers.update(printer_model=None)
+        log_audit(request.user, 'delete', model, {'action': 'deleted', 'printers_unlinked': True})
         model.delete()
         messages.success(request, 'Printer model deleted successfully.')
-        log_audit(request.user, 'delete', model, {'action': 'deleted', 'printers_unlinked': True})
         return redirect('printer_model_list')
 
 
@@ -1397,14 +1418,24 @@ class SupplyTypeCreateView(LoginRequiredMixin, View):
 
     def get(self, request):
         form = SupplyTypeForm()
+        if request.GET.get('modal'):
+            return render(request, 'inventory/supply_type_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/supply_type_form.html', {'form': form})
 
     def post(self, request):
         form = SupplyTypeForm(request.POST)
         if form.is_valid():
-            form.save()
+            supply_type = form.save()
             messages.success(request, 'Supply type created successfully.')
+            
+            if request.POST.get('modal'):
+                next_url = request.POST.get('next', reverse('supply_type_list'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'pk': supply_type.pk, 'name': supply_type.name, 'next': next_url})
+                return redirect(next_url + '?created=' + str(supply_type.pk))
             return redirect('supply_type_list')
+        if request.POST.get('modal'):
+            return render(request, 'inventory/supply_type_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/supply_type_form.html', {'form': form})
 
 
@@ -1754,6 +1785,8 @@ class DepartmentDetailView(LoginRequiredMixin, DetailView):
 class DepartmentCreateView(LoginRequiredMixin, View):
     def get(self, request):
         form = DepartmentForm()
+        if request.GET.get('modal'):
+            return render(request, 'inventory/department_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/department_form.html', {'form': form})
 
     def post(self, request):
@@ -1762,7 +1795,15 @@ class DepartmentCreateView(LoginRequiredMixin, View):
             department = form.save()
             messages.success(request, 'Department created successfully.')
             log_audit(request.user, 'create', department, {'action': 'created'})
+            
+            if request.POST.get('modal'):
+                next_url = request.POST.get('next', reverse('department_list'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'pk': department.pk, 'name': department.name, 'next': next_url})
+                return redirect(next_url + '?created=' + str(department.pk))
             return redirect('department_list')
+        if request.POST.get('modal'):
+            return render(request, 'inventory/department_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/department_form.html', {'form': form})
 
 
@@ -1837,6 +1878,8 @@ class LocationDetailView(LoginRequiredMixin, DetailView):
 class LocationCreateView(LoginRequiredMixin, View):
     def get(self, request):
         form = LocationForm()
+        if request.GET.get('modal'):
+            return render(request, 'inventory/location_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/location_form.html', {'form': form})
 
     def post(self, request):
@@ -1845,7 +1888,15 @@ class LocationCreateView(LoginRequiredMixin, View):
             location = form.save()
             messages.success(request, 'Location created successfully.')
             log_audit(request.user, 'create', location, {'action': 'created'})
+            
+            if request.POST.get('modal'):
+                next_url = request.POST.get('next', reverse('location_list'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'pk': location.pk, 'name': location.name, 'next': next_url})
+                return redirect(next_url + '?created=' + str(location.pk))
             return redirect('location_list')
+        if request.POST.get('modal'):
+            return render(request, 'inventory/location_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/location_form.html', {'form': form})
 
 
@@ -1927,6 +1978,8 @@ class CustodianListView(LoginRequiredMixin, ListView):
 class CustodianCreateView(LoginRequiredMixin, View):
     def get(self, request):
         form = CustodianForm()
+        if request.GET.get('modal'):
+            return render(request, 'inventory/custodian_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/custodian_form.html', {'form': form})
 
     def post(self, request):
@@ -1935,7 +1988,15 @@ class CustodianCreateView(LoginRequiredMixin, View):
             custodian = form.save()
             messages.success(request, 'Custodian created successfully.')
             log_audit(request.user, 'create', custodian, {'action': 'created'})
+            
+            if request.POST.get('modal'):
+                next_url = request.POST.get('next', reverse('custodian_list'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'pk': custodian.pk, 'name': str(custodian), 'next': next_url})
+                return redirect(next_url + '?created=' + str(custodian.pk))
             return redirect('custodian_list')
+        if request.POST.get('modal'):
+            return render(request, 'inventory/custodian_form.html', {'form': form, 'modal': True})
         return render(request, 'inventory/custodian_form.html', {'form': form})
 
 
@@ -1991,9 +2052,9 @@ class CustodianDetailView(LoginRequiredMixin, DetailView):
         return context
 
 @login_required
+@csrf_exempt
 def api_quick_add(request, model_name):
     from django.http import JsonResponse
-    from django.contrib.auth.decorators import permission_required
     
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})

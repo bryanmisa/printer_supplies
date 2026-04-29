@@ -88,6 +88,9 @@ class Custodian(models.Model):
 
     class Meta:
         ordering = ['last_name', 'first_name']
+        constraints = [
+            models.UniqueConstraint(fields=['first_name', 'last_name'], name='unique_custodian')
+        ]
         verbose_name = 'Custodian'
         verbose_name_plural = 'Custodians'
 
@@ -111,13 +114,16 @@ class Supplier(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_supplier')
+        ]
 
     def __str__(self):
         return self.name
 
 
 class SupplyType(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -140,6 +146,9 @@ class PrinterModel(models.Model):
 
     class Meta:
         ordering = ['manufacturer', 'name']
+        constraints = [
+            models.UniqueConstraint(fields=['manufacturer', 'name'], name='unique_printer_model')
+        ]
         verbose_name = 'Printer Model'
         verbose_name_plural = 'Printer Models'
 
@@ -154,7 +163,7 @@ class Printer(models.Model):
         ('retired', 'Retired'),
     ]
     name = models.CharField(max_length=200)
-    printer_model = models.ForeignKey(PrinterModel, on_delete=models.PROTECT, related_name='printers')
+    printer_model = models.ForeignKey(PrinterModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
     serial_number = models.CharField(max_length=100, unique=True)
     custodian = models.ForeignKey(Custodian, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
@@ -168,6 +177,9 @@ class Printer(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_printer')
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.serial_number})"
@@ -290,7 +302,7 @@ class AuditLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.SET_NULL, null=True)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(null=True, blank=True)
     object_repr = models.CharField(max_length=500)
     changes = models.JSONField(default=dict, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
