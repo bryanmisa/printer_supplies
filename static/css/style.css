@@ -602,17 +602,6 @@ main { padding: 28px 32px; }
 .table-hover > tbody > tr:hover > td { background: var(--surface-2) !important; }
 
 /* ── Select Dark Theme ─────────────────────────────── */
-select.form-select,
-select.form-control,
-.form-select,
-.form-control {
-    background-color: var(--surface-2) !important;
-    color: var(--text-1) !important;
-    border: 1px solid var(--border-strong) !important;
-    font-size: 1rem;
-    padding: 12px 14px;
-    line-height: 1.5;
-    box-shadow: none !important;
 }
 
 select.form-select:focus,
@@ -808,6 +797,7 @@ input[type="time"]::-moz-calendar-picker-indicator {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
 }
 
 .field-group label {
@@ -817,17 +807,38 @@ input[type="time"]::-moz-calendar-picker-indicator {
   letter-spacing: .02em;
 }
 
+.btn-clear-input {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  color: var(--text-3);
+  cursor: pointer;
+  display: none;
+  z-index: 10;
+}
+
 .form-control,
 .form-select {
   background: var(--bg) !important;
   border: 1px solid var(--border-strong) !important;
   border-radius: var(--radius-sm) !important;
   color: var(--text-1) !important;
-  padding: 11px 16px !important;
+  padding: 11px 16px;
   font-size: .9rem;
   line-height: 1.5;
   transition: border-color .2s, box-shadow .2s;
   width: 100%;
+  box-sizing: border-box !important;
+}
+
+.form-control.has-clear-btn {
+  padding-right: 32px !important;
 }
 
 .form-control:focus,
@@ -1257,26 +1268,3 @@ code {
 }
 
 .sidebar-overlay.show { display: block; }
-
-/* ── Clear Buttons ─────────────────────────────── */
-.btn-clear-input {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--text-3);
-    cursor: pointer;
-    display: none;
-    z-index: 10;
-    padding: 4px;
-}
-
-.btn-clear-input:hover {
-    color: var(--text-1);
-}
-
-.position-relative {
-    position: relative;
-}

@@ -22,19 +22,13 @@ $(document).ready(function () {
     // Add clear button to text inputs
     $('input[type="text"], input[type="email"], input[type="number"], textarea').each(function() {
         const $input = $(this);
-        if ($input.closest('.d-flex.gap-2').length > 0) return; // Skip if already in a flex container with buttons
+        if ($input.closest('.d-flex.gap-2').length > 0) return;
         
-        const inputWrapper = $('<div class="position-relative"></div>');
-        $input.wrap(inputWrapper);
-        
-        const $clearBtn = $('<button type="button" class="btn-clear-input" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-3); cursor:pointer; display:none; z-index:10;"><i class="bi bi-x-circle"></i></button>');
-        
+        const $clearBtn = $('<button type="button" class="btn-clear-input"><i class="bi bi-x-circle"></i></button>');
         $input.after($clearBtn);
         
-        // Position adjustment for form-control
-        if ($input.hasClass('form-control')) {
-            $input.css('padding-right', '30px');
-        }
+        // Add class to input for CSS padding
+        $input.addClass('has-clear-btn');
         
         $input.on('input', function() {
             if ($(this).val()) {
@@ -49,28 +43,11 @@ $(document).ready(function () {
             $(this).hide();
         });
         
-        // Show clear button if input has value on load
         if ($input.val()) {
             $clearBtn.show();
         }
     });
-
-    // Clear button for Select2 in flex containers (with + button)
-    $('.d-flex.gap-2').each(function() {
-        const $container = $(this);
-        const $select = $container.find('select');
-        const $addBtn = $container.find('button[type="button"]');
-        
-        if ($select.length > 0 && $addBtn.length > 0) {
-            const $clearBtn = $('<button type="button" class="btn btn-sm btn-outline-secondary" title="Clear selection"><i class="bi bi-x"></i></button>');
-            $addBtn.after($clearBtn);
-            
-            $clearBtn.on('click', function() {
-                $select.val(null).trigger('change');
-            });
-        }
-    });
-
+    
     // ── Form validation modal ───────────────────────────────
     $(document).on('submit', 'form[novalidate]', function (e) {
         const $form = $(this);
