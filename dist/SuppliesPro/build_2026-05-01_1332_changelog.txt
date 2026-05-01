@@ -1,0 +1,7 @@
+===============================================
+Build: Fri May  1 01:32:02 PM +03 2026
+Source: /home/bryan/projects/printer_supplies/dist/SuppliesPro/../../printer_supplies
+Destination: /home/bryan/projects/printer_supplies/dist/SuppliesPro
+===============================================
+
+[NEW] settings.py

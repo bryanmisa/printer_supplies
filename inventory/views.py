@@ -139,7 +139,7 @@ class SupplyListView(LoginRequiredMixin, ListView):
     context_object_name = 'supplies'
 
     def get_queryset(self):
-        queryset = Supply.objects.filter(is_active=True)
+        queryset = Supply.objects.filter(is_active=True).order_by('name')
         query = self.request.GET.get('q')
         status = self.request.GET.get('status')
         printer_model = self.request.GET.get('printer_model')
@@ -303,7 +303,7 @@ class SupplierListView(LoginRequiredMixin, ListView):
     context_object_name = 'suppliers'
 
     def get_queryset(self):
-        queryset = Supplier.objects.all()
+        queryset = Supplier.objects.all().order_by('name')
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(
@@ -400,7 +400,7 @@ class PrinterListView(LoginRequiredMixin, ListView):
     context_object_name = 'printers'
 
     def get_queryset(self):
-        queryset = Printer.objects.all()
+        queryset = Printer.objects.all().order_by('name')
         query = self.request.GET.get('q')
         status = self.request.GET.get('status')
         custodian = self.request.GET.get('custodian')
@@ -509,7 +509,7 @@ class PrinterModelListView(LoginRequiredMixin, ListView):
     context_object_name = 'printer_models'
 
     def get_queryset(self):
-        queryset = PrinterModel.objects.all()
+        queryset = PrinterModel.objects.all().order_by('manufacturer', 'name')
         query = self.request.GET.get('q')
         manufacturer = self.request.GET.get('manufacturer')
         status = self.request.GET.get('status')
@@ -615,15 +615,15 @@ class DeliveryListView(LoginRequiredMixin, ListView):
     context_object_name = 'deliveries'
 
     def get_queryset(self):
-        queryset = Delivery.objects.all()
+        queryset = Delivery.objects.all().order_by('-delivery_date')
         query = self.request.GET.get('q')
         supplier = self.request.GET.get('supplier')
-
+        
         if query:
             queryset = queryset.filter(notes__icontains=query)
         if supplier:
             queryset = queryset.filter(supplier_id=supplier)
-
+        
         return queryset.select_related('supplier', 'created_by')
 
     def get_context_data(self, **kwargs):
@@ -755,17 +755,17 @@ class InstallationListView(LoginRequiredMixin, ListView):
     context_object_name = 'installations'
 
     def get_queryset(self):
-        queryset = SupplyInstallation.objects.all()
+        queryset = SupplyInstallation.objects.all().order_by('-installed_at')
         printer = self.request.GET.get('printer')
         status = self.request.GET.get('status')
-
+        
         if printer:
             queryset = queryset.filter(printer_id=printer)
         if status == 'active':
             queryset = queryset.filter(is_active=True)
         elif status == 'disposed':
             queryset = queryset.filter(is_active=False)
-
+        
         return queryset.select_related('printer', 'printer__printer_model', 'supply', 'installed_by')
 
     def get_context_data(self, **kwargs):
@@ -1403,6 +1403,7 @@ def audit_log(request):
     if date_to:
         queryset = queryset.filter(timestamp__date__lte=date_to)
 
+    queryset = queryset.order_by('-timestamp')
     paginator = Paginator(queryset, 50)
     page = request.GET.get('page')
     logs = paginator.get_page(page)
@@ -1442,7 +1443,7 @@ class SupplyTypeListView(LoginRequiredMixin, ListView):
     context_object_name = 'supply_types'
 
     def get_queryset(self):
-        queryset = SupplyType.objects.filter(is_active=True)
+        queryset = SupplyType.objects.filter(is_active=True).order_by('name')
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(name__icontains=query)
@@ -1560,7 +1561,7 @@ def global_search(request):
 
 @admin_required
 def user_list(request):
-    users = User.objects.all()
+    users = User.objects.all().order_by('username')
     query = request.GET.get('q')
     role = request.GET.get('role')
     
@@ -1801,13 +1802,13 @@ class DepartmentListView(LoginRequiredMixin, ListView):
     context_object_name = 'departments'
 
     def get_queryset(self):
-        queryset = Department.objects.all()
+        queryset = Department.objects.all().order_by('name')
         query = self.request.GET.get('q')
         status = self.request.GET.get('status')
-
+        
         if status != 'all':
             queryset = queryset.filter(is_active=True)
-
+        
         if query:
             queryset = queryset.filter(
                 Q(name__icontains=query) | Q(description__icontains=query)
@@ -1894,13 +1895,13 @@ class LocationListView(LoginRequiredMixin, ListView):
     context_object_name = 'locations'
 
     def get_queryset(self):
-        queryset = Location.objects.all()
+        queryset = Location.objects.all().order_by('name')
         query = self.request.GET.get('q')
         status = self.request.GET.get('status')
-
+        
         if status != 'all':
             queryset = queryset.filter(is_active=True)
-
+        
         if query:
             queryset = queryset.filter(
                 Q(name__icontains=query) | Q(description__icontains=query)
@@ -1987,15 +1988,15 @@ class CustodianListView(LoginRequiredMixin, ListView):
     context_object_name = 'custodians'
 
     def get_queryset(self):
-        queryset = Custodian.objects.all()
+        queryset = Custodian.objects.all().order_by('first_name', 'last_name')
         query = self.request.GET.get('q')
         department = self.request.GET.get('department')
         location = self.request.GET.get('location')
         status = self.request.GET.get('status')
-
+        
         if status != 'all':
             queryset = queryset.filter(is_active=True)
-
+        
         if query:
             queryset = queryset.filter(
                 Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query)
@@ -2004,7 +2005,7 @@ class CustodianListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(department_id=department)
         if location:
             queryset = queryset.filter(location_id=location)
-
+        
         return queryset.select_related('department', 'location')
 
     def get_context_data(self, **kwargs):
