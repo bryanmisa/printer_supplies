@@ -92,47 +92,106 @@ build.bat C:\projects\printer_supplies
 
 ## Initial Setup (First Time)
 
-### Linux/Mac
-```bash
-cd SuppliesPro/linux
-./setup.sh
-```
-
-### Windows
-```cmd
-cd SuppliesPro\windows
-setup.bat
-```
-
-## Starting the Server
-
-### Linux/Mac
+### Linux/Mac (Development)
 ```bash
 cd SuppliesPro/linux
 ./start.sh
 ```
 
-### Windows
+### Windows (Development)
 ```cmd
 cd SuppliesPro\windows
 start.bat
 ```
 
-Server will be available at: `http://127.0.0.1:8080`
+### Linux/Mac (Production - Waitress)
+```bash
+cd SuppliesPro/linux
+./start.sh
+```
+Server accessible from: `http://0.0.0.0:8080` (other computers can access)
+
+### Windows (Production - Waitress)
+```cmd
+cd SuppliesPro\windows
+start.bat
+```
+Server accessible from: `http://0.0.0.0:8080` (other computers can access)
+
+## Running as a Service (Auto-Start on Boot)
+
+### Linux - systemd Service (Recommended)
+```bash
+cd SuppliesPro/linux
+sudo ./install_service.sh
+```
+
+This will:
+1. Install SuppliesPro as a systemd service
+2. Start the service automatically on boot
+3. Keep the server running after logout
+4. Auto-restart on crash (10 second delay)
+
+**Service commands:**
+```bash
+sudo systemctl start suppliespro      # Start service
+sudo systemctl stop suppliespro       # Stop service
+sudo systemctl restart suppliespro   # Restart service
+sudo systemctl status suppliespro    # Check status
+sudo journalctl -u suppliespro -f  # View logs
+sudo systemctl disable suppliespro   # Disable auto-start
+```
+
+### Linux - Cron @reboot (Alternative)
+Add to crontab (`crontab -e`):
+```
+@reboot /path/to/SuppliesPro/linux/startup.sh
+```
+
+### Windows - NSSM Service (Recommended)
+1. Download NSSM (Non-Sucking Service Manager): https://nssm.cc/download
+2. Install service:
+```cmd
+cd SuppliesPro\windows
+runas /user:Administrator install_service.bat
+```
+
+### Windows - Task Scheduler (Alternative)
+The `install_service.bat` will automatically:
+1. Create a scheduled task that runs on system startup
+2. Add a shortcut to the Startup folder for user login
+3. Start the server immediately
+
+**Task commands:**
+```cmd
+schtasks /run /tn "SuppliesPro"     # Start task
+schtasks /end /tn "SuppliesPro"     # Stop task
+schtasks /delete /tn "SuppliesPro" /f  # Delete task
+```
 
 ## Updating Existing Installation
 
 ### Linux/Mac
 ```bash
 cd SuppliesPro/linux
-./update.sh
+./setup.sh
 ```
+This will:
+1. Create virtual environment
+2. Install dependencies (including Waitress)
+3. Create database with migrations
+4. Create admin user
 
 ### Windows
 ```cmd
 cd SuppliesPro\windows
-update.bat
+setup.bat
 ```
+This will:
+1. Create virtual environment
+2. Install dependencies (including Waitress)
+3. Create database with migrations
+4. Create admin user
 
 The update script will:
 1. Backup the database
