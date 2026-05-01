@@ -678,7 +678,7 @@ class DeliveryCreateView(LoginRequiredMixin, View):
 
             supply_ids = request.POST.getlist('supplies')
             quantities = request.POST.getlist('quantities')
-            
+
             for supply_id, quantity in zip(supply_ids, quantities):
                 if supply_id and quantity:
                     supply = Supply.objects.get(pk=supply_id)
@@ -702,13 +702,50 @@ class DeliveryCreateView(LoginRequiredMixin, View):
             messages.success(request, 'Delivery created successfully.')
             return redirect('delivery_list')
 
-        return render(request, self.template_name, {'form': form})
+        supplier_id = request.POST.get('supplier')
+        deliveries = None
+
+        all_supplies = list(Supply.objects.filter(is_active=True).values('id', 'name', 'sku'))
+        all_supplies_json = json.dumps(all_supplies)
+
+        if supplier_id:
+            deliveries = Delivery.objects.filter(supplier_id=supplier_id).select_related('supplier').prefetch_related('items', 'items__supply').order_by('-delivery_date')[:20]
+            past_supplies = set()
+            for d in deliveries:
+                for item in d.items.all():
+                    past_supplies.add(item.supply)
+            context_supplies = list(past_supplies)
+        else:
+            context_supplies = []
+
+        return render(request, self.template_name, {
+            'form': form,
+            'past_deliveries': deliveries,
+            'past_supplies': context_supplies,
+            'suppliers': Supplier.objects.all(),
+            'all_supplies': all_supplies,
+            'all_supplies_json': all_supplies_json,
+            'today': datetime.now().strftime('%Y-%m-%d'),
+            'departments': Department.objects.all(),
+            'locations': Location.objects.all(),
+            'posted_supplier': request.POST.get('supplier'),
+            'posted_supplies': request.POST.getlist('supplies'),
+            'posted_quantities': request.POST.getlist('quantities'),
+            'posted_notes': request.POST.get('notes'),
+            'posted_delivery_date': request.POST.get('delivery_date'),
+        })
 
 
 class DeliveryDetailView(LoginRequiredMixin, DetailView):
     model = Delivery
     template_name = 'inventory/delivery_detail.html'
     context_object_name = 'delivery'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        delivery = self.object
+        context['total_quantity'] = sum(item.quantity for item in delivery.items.all())
+        return context
 
 
 class InstallationListView(LoginRequiredMixin, ListView):
@@ -1555,6 +1592,7 @@ def user_create(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.is_superuser = form.cleaned_data.get('is_superuser', False)
+            user.is_active = form.cleaned_data.get('is_active', True)
             user.save()
             
             messages.success(request, f'User {user.username} created successfully.')
@@ -1576,6 +1614,7 @@ def user_edit(request, pk):
         if form.is_valid():
             user = form.save(commit=False)
             user.is_superuser = form.cleaned_data.get('is_superuser', False)
+            user.is_active = form.cleaned_data.get('is_active', True)
             user.save()
             
             messages.success(request, f'User {user.username} updated successfully.')
@@ -1978,17 +2017,20 @@ class CustodianListView(LoginRequiredMixin, ListView):
 class CustodianCreateView(LoginRequiredMixin, View):
     def get(self, request):
         form = CustodianForm()
+        context = {'form': form, 'departments': Department.objects.all(), 'locations': Location.objects.all()}
         if request.GET.get('modal'):
-            return render(request, 'inventory/custodian_form.html', {'form': form, 'modal': True})
-        return render(request, 'inventory/custodian_form.html', {'form': form})
+            context['modal'] = True
+            return render(request, 'inventory/custodian_form.html', context)
+        return render(request, 'inventory/custodian_form.html', context)
 
     def post(self, request):
         form = CustodianForm(request.POST)
+        context = {'form': form, 'departments': Department.objects.all(), 'locations': Location.objects.all()}
         if form.is_valid():
             custodian = form.save()
             messages.success(request, 'Custodian created successfully.')
             log_audit(request.user, 'create', custodian, {'action': 'created'})
-            
+
             if request.POST.get('modal'):
                 next_url = request.POST.get('next', reverse('custodian_list'))
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -1996,25 +2038,26 @@ class CustodianCreateView(LoginRequiredMixin, View):
                 return redirect(next_url + '?created=' + str(custodian.pk))
             return redirect('custodian_list')
         if request.POST.get('modal'):
-            return render(request, 'inventory/custodian_form.html', {'form': form, 'modal': True})
-        return render(request, 'inventory/custodian_form.html', {'form': form})
+            context['modal'] = True
+        return render(request, 'inventory/custodian_form.html', context)
 
 
 class CustodianUpdateView(LoginRequiredMixin, View):
     def get(self, request, pk):
         custodian = get_object_or_404(Custodian, pk=pk)
         form = CustodianForm(instance=custodian)
-        return render(request, 'inventory/custodian_form.html', {'form': form, 'object': custodian})
+        return render(request, 'inventory/custodian_form.html', {'form': form, 'object': custodian, 'departments': Department.objects.all(), 'locations': Location.objects.all()})
 
     def post(self, request, pk):
         custodian = get_object_or_404(Custodian, pk=pk)
         form = CustodianForm(request.POST, instance=custodian)
+        context = {'form': form, 'object': custodian, 'departments': Department.objects.all(), 'locations': Location.objects.all()}
         if form.is_valid():
             custodian = form.save()
             messages.success(request, 'Custodian updated successfully.')
             log_audit(request.user, 'update', custodian, {'action': 'updated'})
             return redirect('custodian_list')
-        return render(request, 'inventory/custodian_form.html', {'form': form, 'object': custodian})
+        return render(request, 'inventory/custodian_form.html', context)
 
 
 class CustodianDeleteView(LoginRequiredMixin, View):

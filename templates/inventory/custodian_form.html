@@ -62,14 +62,24 @@
             <div class="col-md-6">
                 <div class="field-group">
                     <label for="{{ form.department.id_for_label }}">Department</label>
-                    {{ form.department }}
+                    <div class="d-flex gap-2">
+                        {{ form.department }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#departmentModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                     {% if form.department.errors %}<div class="invalid-feedback">{{ form.department.errors.0 }}</div>{% endif %}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="field-group">
                     <label for="{{ form.location.id_for_label }}">Location</label>
-                    {{ form.location }}
+                    <div class="d-flex gap-2">
+                        {{ form.location }}
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                     {% if form.location.errors %}<div class="invalid-feedback">{{ form.location.errors.0 }}</div>{% endif %}
                 </div>
             </div>
@@ -112,4 +122,8 @@
         </button>
     </div>
 </form>
+
+{% block extra_js %}
+{% include 'includes/quick_add_modals.html' with departments=departments locations=locations %}
+{% endblock %}
 {% endblock %}

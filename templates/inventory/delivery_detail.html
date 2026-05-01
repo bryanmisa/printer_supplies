@@ -3,49 +3,110 @@
 {% block page_title %}Delivery #{{ delivery.id }}{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">Delivery Details</div>
-    <div class="card-body">
-        <table class="table table-bordered mb-4" style="--bs-table-color: #fff !important;">
-            <tbody>
-                <tr>
-                    <th scope="row" style="width: 150px; color: #fff !important;">Supplier</th>
-                    <td style="color: #fff !important;"><a href="{% url 'supplier_detail' delivery.supplier.pk %}" class="text-decoration-none" style="color: #fff !important;">{{ delivery.supplier.name }}</a></td>
-                </tr>
-                <tr>
-                    <th scope="row" style="color: #fff !important;">Date</th>
-                    <td style="color: #fff !important;">{{ delivery.delivery_date }}</td>
-                </tr>
-                <tr>
-                    <th scope="row" style="color: #fff !important;">Created By</th>
-                    <td style="color: #fff !important;">{{ delivery.created_by.username }}</td>
-                </tr>
-                <tr>
-                    <th scope="row" style="color: #fff !important;">Notes</th>
-                    <td style="color: #fff !important;">{{ delivery.notes|default:"-" }}</td>
-                </tr>
-            </tbody>
-        </table>
-        <h5 class="mb-3" style="color: #fff !important;">Items</h5>
-        <table class="table table-bordered" style="--bs-table-color: #fff !important;">
-            <thead>
-                <tr>
-                    <th style="color: #fff !important;">Supply</th>
-                    <th style="color: #fff !important;">SKU</th>
-                    <th style="color: #fff !important;">Quantity</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in delivery.items.all %}
-                <tr>
-                    <td style="color: #fff !important;"><a href="{% url 'supply_detail' item.supply.pk %}" class="text-decoration-none" style="color: #fff !important;">{{ item.supply.name }}</a></td>
-                    <td style="color: #fff !important;">{{ item.supply.sku }}</td>
-                    <td style="color: #fff !important;">{{ item.quantity }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <a href="{% url 'delivery_list' %}" class="btn btn-secondary">Back</a>
+<div class="row g-4">
+    <!-- Delivery Info -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-truck-flatbed"></i>
+                <span>Delivery Information</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-uppercase text-muted small" style="font-size: 0.7rem; letter-spacing: 0.1em;">Supplier</label>
+                    <p class="mb-0 fs-5">
+                        <a href="{% url 'supplier_detail' delivery.supplier.pk %}" class="text-decoration-none">
+                            {{ delivery.supplier.name }}
+                        </a>
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <label class="text-uppercase text-muted small" style="font-size: 0.7rem; letter-spacing: 0.1em;">Delivery Date</label>
+                    <p class="mb-0 fs-5">{{ delivery.delivery_date|date:"F d, Y" }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="text-uppercase text-muted small" style="font-size: 0.7rem; letter-spacing: 0.1em;">Created By</label>
+                    <p class="mb-0">
+                        <i class="bi bi-person-fill me-2"></i>{{ delivery.created_by.username }}
+                    </p>
+                </div>
+                {% if delivery.notes %}
+                <div class="mb-3">
+                    <label class="text-uppercase text-muted small" style="font-size: 0.7rem; letter-spacing: 0.1em;">Notes</label>
+                    <p class="mb-0">{{ delivery.notes }}</p>
+                </div>
+                {% endif %}
+                {% if delivery.delivery_note %}
+                <div class="mb-3">
+                    <label class="text-uppercase text-muted small" style="font-size: 0.7rem; letter-spacing: 0.1em;">Attachment</label>
+                    <p class="mb-0">
+                        <a href="{{ delivery.delivery_note.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-paperclip"></i> View Attachment
+                        </a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
+
+    <!-- Items -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-box-seam-fill"></i>
+                    <span>Delivery Items</span>
+                </div>
+                <span class="badge badge-primary">{{ delivery.items.count }} item{{ delivery.items.count|pluralize }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Supply</th>
+                                <th>SKU</th>
+                                <th>Current Stock</th>
+                                <th class="text-end">Quantity Added</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in delivery.items.all %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'supply_detail' item.supply.pk %}" class="text-decoration-none fw-500">
+                                        {{ item.supply.name }}
+                                    </a>
+                                </td>
+                                <td><code class="text-white">{{ item.supply.sku }}</code></td>
+                                <td>{{ item.supply.current_stock }}</td>
+                                <td class="text-end">
+                                    <span class="badge badge-success">+{{ item.quantity }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <td colspan="3" class="text-end fw-bold">Total Items:</td>
+                                <td class="text-end fw-bold">{{ delivery.items.count }}</td>
+                            </tr>
+                            <tr class="table-light">
+                                <td colspan="3" class="text-end fw-bold">Total Quantity:</td>
+                                <td class="text-end fw-bold">{{ total_quantity }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'delivery_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Deliveries
+    </a>
 </div>
 {% endblock %}
