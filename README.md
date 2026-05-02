@@ -11,6 +11,22 @@ Printer Supply Management System - Track printer supplies, installations, and co
 - **Reports** - Inventory status, replenishment needs, and consumption analytics
 - **User Management** - Role-based access (Admin, Manager, Staff)
 - **Database Backup** - Backup and restore for disaster recovery
+- **Audit Trail** - Track all create, update, delete, install, and dispose actions
+- **Security Hardening** - Protection against common vulnerabilities (see docs/SECURITY_AUDIT.md)
+
+## Documentation
+
+All project documentation is organized in the `docs/` folder:
+
+| Document | Description |
+|----------|-------------|
+| `docs/changelog.md` | Version history and release notes |
+| `docs/MODEL_UPDATE_MANUAL.md` | Safe procedures for updating Django models in production |
+| `docs/SECURITY_AUDIT.md` | Security audit findings and remediation |
+
+Additional deployment guides are available in `dist/SuppliesPro/`:
+- `dist/SuppliesPro/README.txt` - Quick start guide
+- `dist/SuppliesPro/README_BUILD.txt` - Build and deployment guide
 
 ## Requirements
 
@@ -105,6 +121,7 @@ Open http://localhost:8080 in your browser.
 printer_supplies/
 ├── manage.py              # Django CLI
 ├── requirements.txt      # Python dependencies
+├── README.md            # This file
 ├── printer_supplies/     # Django project settings
 │   ├── settings.py
 │   ├── urls.py
@@ -113,11 +130,20 @@ printer_supplies/
 │   ├── models.py       # Database models
 │   ├── views.py       # View logic
 │   ├── forms.py      # Form definitions
+│   ├── migrations/   # Database migrations
 │   └── templates/    # HTML templates
 ├── rbac/              # Role-based access control
+│   ├── models.py
+│   └── migrations/
+├── docs/               # Documentation
+│   ├── changelog.md  # Version history
+│   ├── MODEL_UPDATE_MANUAL.md  # Model update procedures
+│   └── SECURITY_AUDIT.md       # Security documentation
 ├── templates/          # Base templates
 ├── static/            # CSS and JavaScript
-└── media/            # Uploaded files
+├── staticfiles/       # Collected static files
+├── media/            # Uploaded files
+└── dist/             # Deployment packages
 ```
 
 ## Available URLs
@@ -188,6 +214,10 @@ python manage.py setup_rbac
 
 # Collect static files
 python manage.py collectstatic
+
+# Run database migrations (see docs/MODEL_UPDATE_MANUAL.md)
+python manage.py migrate
+python manage.py makemigrations
 ```
 
 ## License
