@@ -12,7 +12,7 @@
             </div>
             <div class="filter-group">
                 <label>Action</label>
-                <select name="action" class="form-select">
+                <select name="action" class="form-select no-select2">
                     <option value="">All Actions</option>
                     {% for value, label in actions %}
                     <option value="{{ value }}">{{ label }}</option>
@@ -21,7 +21,7 @@
             </div>
             <div class="filter-group">
                 <label>User</label>
-                <select name="user" class="form-select">
+                <select name="user" class="form-select no-select2">
                     <option value="">All Users</option>
                     {% for user in users %}
                     <option value="{{ user.id }}">{{ user.username }}</option>

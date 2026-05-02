@@ -1,61 +1,92 @@
 {% extends "base.html" %}
-{% block title %}Printer Models - SuppliesPro{% endblock %}
+{% block title %}Printer Models – SuppliesPro{% endblock %}
 {% block page_title %}Printer Models{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header">
     <div>
-        <p class="text-muted m-0">Manage hardware compatibility groups</p>
+        <h2>Printer Models</h2>
+        <p>Manage hardware compatibility groups</p>
     </div>
-    {% if user.role != 'staff' %}
     <a href="{% url 'printer_model_create' %}" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-2"></i>New Model
+        <i class="bi bi-plus-lg"></i> Add Model
     </a>
-    {% endif %}
 </div>
 
-<div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Manufacturer</th>
-                        <th>Model Name</th>
-                        <th>Compatible Supplies</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pm in printer_models %}
-                    <tr>
-                        <td><span class="fw-bold">{{ pm.manufacturer }}</span></td>
-                        <td><a href="{% url 'printer_model_detail' pm.pk %}" style="color: var(--text-1); text-decoration: none;">{{ pm.name }}</a></td>
-                        <td>
-                            <span class="badge badge-neon">{{ pm.supplies.count }} Supplies</span>
-                        </td>
-                        <td class="text-end">
-                            {% if user.role != 'staff' %}
-                            <a href="{% url 'printer_model_update' pm.pk %}" class="btn btn-sm btn-light">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center py-5">
-                            <div class="empty-state">
-                                <i class="bi bi-cpu"></i>
-                                <h5>No models defined</h5>
-                                <p>Create a printer model to start organizing your inventory</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<form method="get" class="filter-bar">
+    <div class="filter-group" style="flex:1;">
+        <label>Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Name or manufacturer…" value="{{ request.GET.q }}">
     </div>
+    <div class="filter-group">
+        <label>Manufacturer</label>
+        <select name="manufacturer" class="form-select no-select2">
+            <option value="">All</option>
+            {% for m in manufacturers %}
+            <option value="{{ m }}" {% if request.GET.manufacturer == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-select no-select2">
+            <option value="active" {% if request.GET.status != 'all' %}selected{% endif %}>Active</option>
+            <option value="all" {% if request.GET.status == 'all' %}selected{% endif %}>All</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left:24px;">Model</th>
+                <th>Manufacturer</th>
+                <th>Printers</th>
+                <th>Supplies</th>
+                <th class="text-end" style="padding-right:24px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pm in printer_models %}
+            <tr class="{% if not pm.is_active %}table-secondary opacity-50{% endif %}">
+                <td style="padding-left:24px;">
+                    <a href="{% url 'printer_model_detail' pm.pk %}" style="font-weight:600; color:var(--text-1);">{{ pm.name }}</a>
+                </td>
+                <td>{{ pm.manufacturer }}</td>
+                <td><span class="badge badge-primary">{{ pm.printers.count }}</span></td>
+                <td><span class="badge badge-secondary">{{ pm.supplies.count }}</span></td>
+                <td style="text-align:right; padding-right:24px;">
+                    <a href="{% url 'printer_model_update' pm.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="post" action="{% url 'printer_model_toggle' pm.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if pm.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{{ pm.is_active|yesno:'Disable,Enable' }}">
+                            <i class="bi bi-{{ pm.is_active|yesno:'toggle-on,toggle-off' }}"></i>
+                        </button>
+                    </form>
+                    <a href="{% url 'printer_model_delete' pm.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-cpu"></i></div>
+                        <h5>No printer models found</h5>
+                        <p>Try adjusting your filters or add the first printer model.</p>
+                        <a href="{% url 'printer_model_create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Add Model
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

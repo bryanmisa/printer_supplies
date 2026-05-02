@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit Supply{% else %}New Supply{% endif %} – SuppliesPro{% endblock %}
+{% block page_title %}{% if object %}Edit Supply{% else %}New Supply{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.show {
+    display: flex;
+}
+.modal-content {
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    text-align: center;
+}
+.modal-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--warning);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+.modal-icon i {
+    font-size: 2rem;
+    color: var(--bg);
+}
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.modal-message {
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+}
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{% if object %}{{ object.name }}{% else %}New Supply Item{% endif %}</h2>
+        <p>{% if object %}Update product details and inventory thresholds{% else %}Add a new consumable to your inventory{% endif %}</p>
+    </div>
+    <a href="{% url 'supply_list' %}" class="btn btn-ghost">
+        <i class="bi bi-arrow-left"></i> Back to Supplies
+    </a>
+</div>
+
+<form method="post" novalidate enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Section 1: Product Identity -->
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-tag-fill"></i> Product Identity
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.name.id_for_label }}">Supply Name <span style="color:var(--danger);">*</span></label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.sku.id_for_label }}">SKU / Part Number <span style="color:var(--danger);">*</span></label>
+                    {{ form.sku }}
+                    {% if form.sku.errors %}<div class="invalid-feedback">{{ form.sku.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.supply_type.id_for_label }}">Supply Type</label>
+                    {{ form.supply_type }}
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="field-group">
+                    <label for="{{ form.description.id_for_label }}">Description <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.description }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Stock Levels -->
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-bar-chart-fill"></i> Stock Level Controls
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="field-group">
+                    <label for="{{ form.current_stock.id_for_label }}">Current Stock <span style="color:var(--danger);">*</span></label>
+                    {{ form.current_stock }}
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="field-group">
+                    <label for="{{ form.low_stock_threshold.id_for_label }}">Low Alert Level <span style="color:var(--danger);">*</span></label>
+                    {{ form.low_stock_threshold }}
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="field-group">
+                    <label for="{{ form.max_stock_threshold.id_for_label }}">Overstock Cap</label>
+                    {{ form.max_stock_threshold }}
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="field-group">
+                    <label for="{{ form.unit_price.id_for_label }}">Unit Price ($)</label>
+                    {{ form.unit_price }}
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="field-group">
+                    <label for="{{ form.image.id_for_label }}">Image <span style="color:var(--text-3); font-weight:400;">(optional)</span></label>
+                    {{ form.image }}
+                    <div class="form-text">Upload a photo of the supply item.</div>
+                    {% if form.image.errors %}<div class="invalid-feedback">{{ form.image.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Compatibility -->
+    <div class="form-section">
+        <div class="form-section-title">
+            <i class="bi bi-diagram-3-fill"></i> Compatibility & Sourcing
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.printer_models.id_for_label }}">Compatible Printer Models <span style="color:var(--danger);">*</span></label>
+                    {{ form.printer_models }}
+                    {% if form.printer_models.errors %}<div class="invalid-feedback d-block">{{ form.printer_models.errors.0 }}</div>{% endif %}
+                    <div class="form-text">Hold Ctrl / Cmd to select multiple models.</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="field-group">
+                    <label for="{{ form.suppliers.id_for_label }}">Approved Suppliers <span style="color:var(--danger);">*</span></label>
+                    {{ form.suppliers }}
+                    <div class="form-text">Authorised vendors who can supply this item.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 p-4" style="background:var(--surface-3); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <div class="d-flex align-items-start gap-3">
+                {{ form.is_active }}
+                <div>
+                    <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}" style="color:var(--text-1);">Active Supply Item</label>
+                    <div class="form-text">Inactive items are hidden from the dashboard and replenishment reports.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex flex-wrap gap-3 justify-content-between">
+        <a href="{% url 'supply_list' %}" class="btn btn-ghost">
+            <i class="bi bi-x-lg"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-lg"></i>
+            {% if object %}Save Changes{% else %}Add to Inventory{% endif %}
+        </button>
+    </div>
+</form>
+
+<!-- Duplicate Name Modal -->
+<div id="duplicateModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h3 class="modal-title">Duplicate Supply Name</h3>
+        <p class="modal-message" id="duplicateMessage"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary" onclick="closeDuplicateModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameField = document.getElementById('id_name');
+    let isDuplicateError = false;
+    let errorMessage = '';
+    
+    // Check for duplicate name error via aria-describedby
+    if (nameField && nameField.getAttribute('aria-describedby')) {
+        const errorId = nameField.getAttribute('aria-describedby');
+        const errorEl = document.getElementById(errorId);
+        if (errorEl && errorEl.textContent.includes('already exists')) {
+            isDuplicateError = true;
+            errorMessage = errorEl.textContent;
+        }
+    }
+    
+    // Also check all .invalid-feedback elements
+    if (!isDuplicateError) {
+        document.querySelectorAll('.invalid-feedback').forEach(function(el) {
+            if (el.textContent.includes('already exists')) {
+                isDuplicateError = true;
+                errorMessage = el.textContent;
+            }
+        });
+    }
+    
+    if (isDuplicateError) {
+        document.getElementById('duplicateMessage').textContent = errorMessage;
+        document.getElementById('duplicateModal').classList.add('show');
+        
+        // Hide inline errors
+        document.querySelectorAll('.invalid-feedback').forEach(function(el) {
+            if (el.textContent.includes('already exists')) {
+                el.style.display = 'none';
+            }
+        });
+    }
+});
+
+function closeDuplicateModal() {
+    document.getElementById('duplicateModal').classList.remove('show');
+}
+</script>
+{% endblock %}
+{% endblock %}

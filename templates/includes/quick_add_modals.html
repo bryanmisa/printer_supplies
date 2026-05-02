@@ -1,0 +1,339 @@
+<!-- Quick Add Custodian Modal -->
+<div class="modal fade" id="custodianModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-person-plus-fill me-2" style="color: var(--primary);"></i>
+                    Add New Custodian
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="custodianModal_form">
+                <div class="modal-body">
+                    <div id="custodianModal_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="custodianModal_first_name" class="form-label" style="color: var(--text-1);">First Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="first_name" id="custodianModal_first_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="custodianModal_last_name" class="form-label" style="color: var(--text-1);">Last Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="last_name" id="custodianModal_last_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="custodianModal_department" class="form-label" style="color: var(--text-1);">Department</label>
+                        <select name="department" id="custodianModal_department" class="form-select select2-select">
+                            <option value="">-- Select Department --</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="custodianModal_location" class="form-label" style="color: var(--text-1);">Location</label>
+                        <select name="location" id="custodianModal_location" class="form-select select2-select">
+                            <option value="">-- Select Location --</option>
+                            {% for loc in locations %}
+                            <option value="{{ loc.id }}">{{ loc.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="custodianModal_email" class="form-label" style="color: var(--text-1);">Email</label>
+                        <input type="email" name="email" id="custodianModal_email" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="custodianModal_phone" class="form-label" style="color: var(--text-1);">Phone</label>
+                        <input type="text" name="phone" id="custodianModal_phone" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Custodian</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Department Modal -->
+<div class="modal fade" id="departmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-building-fill me-2" style="color: var(--primary);"></i>
+                    Add New Department
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="departmentModal_form">
+                <div class="modal-body">
+                    <div id="departmentModal_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="departmentModal_name" class="form-label" style="color: var(--text-1);">Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="name" id="departmentModal_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="departmentModal_description" class="form-label" style="color: var(--text-1);">Description</label>
+                        <textarea name="description" id="departmentModal_description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Location Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-geo-alt-fill me-2" style="color: var(--primary);"></i>
+                    Add New Location
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="locationModal_form">
+                <div class="modal-body">
+                    <div id="locationModal_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="locationModal_name" class="form-label" style="color: var(--text-1);">Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="name" id="locationModal_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="locationModal_description" class="form-label" style="color: var(--text-1);">Description</label>
+                        <textarea name="description" id="locationModal_description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Supplier Modal -->
+<div class="modal fade" id="supplierModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-truck-flatbed me-2" style="color: var(--primary);"></i>
+                    Add New Supplier
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="supplierModal_form">
+                <div class="modal-body">
+                    <div id="supplierModal_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="supplierModal_name" class="form-label" style="color: var(--text-1);">Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="name" id="supplierModal_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplierModal_contact_name" class="form-label" style="color: var(--text-1);">Contact Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="contact_name" id="supplierModal_contact_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplierModal_email" class="form-label" style="color: var(--text-1);">Email <span style="color:var(--danger);">*</span></label>
+                        <input type="email" name="email" id="supplierModal_email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplierModal_phone" class="form-label" style="color: var(--text-1);">Phone <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="phone" id="supplierModal_phone" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplierModal_address" class="form-label" style="color: var(--text-1);">Address <span style="color:var(--danger);">*</span></label>
+                        <textarea name="address" id="supplierModal_address" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Supplier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add SupplyType Modal -->
+<div class="modal fade" id="supplyTypeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-tags-fill me-2" style="color: var(--primary);"></i>
+                    Add New Supply Type
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="supplyTypeModal_form">
+                <div class="modal-body">
+                    <div id="supplyTypeModal_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="supplyTypeModal_name" class="form-label" style="color: var(--text-1);">Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="name" id="supplyTypeModal_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplyTypeModal_description" class="form-label" style="color: var(--text-1);">Description</label>
+                        <textarea name="description" id="supplyTypeModal_description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Supply Type</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add PrinterModel Modal -->
+<div class="modal fade" id="printerModelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--surface-2); border: 1px solid var(--border-strong);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" style="color: var(--text-1);">
+                    <i class="bi bi-cpu me-2" style="color: var(--primary);"></i>
+                    Add New Printer Model
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="printerModelModal_form">
+                <div class="modal-body">
+                    <div id="printerModelModal_error" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="printerModelModal_manufacturer" class="form-label" style="color: var(--text-1);">Manufacturer <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="manufacturer" id="printerModelModal_manufacturer" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="printerModelModal_name" class="form-label" style="color: var(--text-1);">Model Name <span style="color:var(--danger);">*</span></label>
+                        <input type="text" name="name" id="printerModelModal_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="printerModelModal_description" class="form-label" style="color: var(--text-1);">Description</label>
+                        <textarea name="description" id="printerModelModal_description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Printer Model</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.cookie.split('csrftoken=')[1]?.split(';')[0] || '';
+}
+
+const apiUrls = {
+    'custodianModal': '{% url "api_quick_add" model_name="custodian" %}',
+    'departmentModal': '{% url "api_quick_add" model_name="department" %}',
+    'locationModal': '{% url "api_quick_add" model_name="location" %}',
+    'supplierModal': '{% url "api_quick_add" model_name="supplier" %}',
+    'supplyTypeModal': '{% url "api_quick_add" model_name="supplytype" %}',
+    'printerModelModal': '{% url "api_quick_add" model_name="printermodel" %}'
+};
+
+document.querySelectorAll('.modal form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const modalId = form.id.replace('_form', '');
+        const url = apiUrls[modalId];
+        const errorDiv = document.getElementById(modalId + '_error');
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                if (modal) modal.hide();
+                
+                const selectMap = {
+                    'custodianModal': 'id_custodian',
+                    'departmentModal': 'id_department',
+                    'locationModal': 'id_location',
+                    'supplierModal': ['id_supplier', 'id_suppliers'],
+                    'supplyTypeModal': 'id_supply_type',
+                    'printerModelModal': 'id_printer_models'
+                };
+                
+                const selectIds = selectMap[modalId];
+                const targets = Array.isArray(selectIds) ? selectIds : [selectIds];
+                targets.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    if (select) {
+                        const option = document.createElement('option');
+                        option.value = result.id;
+                        option.text = result.name || 'New Item';
+                        option.selected = true;
+                        select.appendChild(option);
+                        $(select).trigger('change.select2');
+                    }
+                });
+                
+                form.reset();
+                if (errorDiv) errorDiv.classList.add('d-none');
+            } else {
+                if (errorDiv) {
+                    errorDiv.textContent = result.error || 'An error occurred';
+                    errorDiv.classList.remove('d-none');
+                }
+            }
+        })
+        .catch(error => {
+            if (errorDiv) {
+                errorDiv.textContent = 'An error occurred: ' + error;
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    });
+});
+
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('shown.bs.modal', function() {
+        $(this).find('.select2-select').each(function() {
+            if (!$(this).data('select2')) {
+                $(this).select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    placeholder: 'Search...',
+                    allowClear: true,
+                    dropdownParent: $(this).closest('.modal')
+                });
+            }
+        });
+    });
+
+    modal.addEventListener('hidden.bs.modal', function() {
+        $(this).find('.select2-select').each(function() {
+            if ($(this).data('select2')) {
+                $(this).select2('destroy');
+            }
+        });
+    });
+});
+</script>

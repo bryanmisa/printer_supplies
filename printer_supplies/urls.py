@@ -22,6 +22,8 @@ urlpatterns = [
     path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
     path('users/<int:pk>/delete/', views.user_delete, name='user_delete'),
     path('users/<int:pk>/toggle/', views.user_toggle_active, name='user_toggle'),
+    path('users/<int:pk>/reset-password/', views.user_reset_password, name='user_reset_password'),
+    path('users/<int:pk>/delete/', views.user_delete, name='user_delete'),
 
     path('supplies/', views.SupplyListView.as_view(), name='supply_list'),
     path('supplies/create/', views.SupplyCreateView.as_view(), name='supply_create'),
@@ -47,6 +49,8 @@ urlpatterns = [
     path('printer-models/<int:pk>/', views.PrinterModelDetailView.as_view(), name='printer_model_detail'),
     path('printer-models/create/', views.PrinterModelCreateView.as_view(), name='printer_model_create'),
     path('printer-models/<int:pk>/update/', views.PrinterModelUpdateView.as_view(), name='printer_model_update'),
+    path('printer-models/<int:pk>/delete/', views.PrinterModelDeleteView.as_view(), name='printer_model_delete'),
+    path('printer-models/<int:pk>/toggle/', views.PrinterModelToggleView.as_view(), name='printer_model_toggle'),
 
     path('deliveries/', views.DeliveryListView.as_view(), name='delivery_list'),
     path('deliveries/create/', views.DeliveryCreateView.as_view(), name='delivery_create'),
@@ -67,9 +71,30 @@ urlpatterns = [
     path('supply-types/<int:pk>/update/', views.SupplyTypeUpdateView.as_view(), name='supply_type_update'),
     path('supply-types/<int:pk>/delete/', views.SupplyTypeDeleteView.as_view(), name='supply_type_delete'),
 
-    path('search/', views.global_search, name='global_search'),
+    path('departments/', views.DepartmentListView.as_view(), name='department_list'),
+    path('departments/create/', views.DepartmentCreateView.as_view(), name='department_create'),
+    path('departments/<int:pk>/', views.DepartmentDetailView.as_view(), name='department_detail'),
+    path('departments/<int:pk>/update/', views.DepartmentUpdateView.as_view(), name='department_update'),
+    path('departments/<int:pk>/delete/', views.DepartmentDeleteView.as_view(), name='department_delete'),
+    path('departments/<int:pk>/toggle/', views.DepartmentToggleView.as_view(), name='department_toggle'),
 
+    path('locations/', views.LocationListView.as_view(), name='location_list'),
+    path('locations/create/', views.LocationCreateView.as_view(), name='location_create'),
+    path('locations/<int:pk>/', views.LocationDetailView.as_view(), name='location_detail'),
+    path('locations/<int:pk>/update/', views.LocationUpdateView.as_view(), name='location_update'),
+    path('locations/<int:pk>/delete/', views.LocationDeleteView.as_view(), name='location_delete'),
+    path('locations/<int:pk>/toggle/', views.LocationToggleView.as_view(), name='location_toggle'),
+
+    path('custodians/', views.CustodianListView.as_view(), name='custodian_list'),
+    path('custodians/create/', views.CustodianCreateView.as_view(), name='custodian_create'),
+    path('custodians/<int:pk>/', views.CustodianDetailView.as_view(), name='custodian_detail'),
+    path('custodians/<int:pk>/update/', views.CustodianUpdateView.as_view(), name='custodian_update'),
+    path('custodians/<int:pk>/delete/', views.CustodianDeleteView.as_view(), name='custodian_delete'),
+    path('custodians/<int:pk>/toggle/', views.CustodianToggleView.as_view(), name='custodian_toggle'),
+
+    path('search/', views.global_search, name='global_search'),
     path('api/printer/<int:printer_id>/compatible-supplies/', views.api_compatible_supplies, name='api_compatible_supplies'),
+    path('api/quick-add/<str:model_name>/', views.api_quick_add, name='api_quick_add'),
 ]
 
 if settings.DEBUG:

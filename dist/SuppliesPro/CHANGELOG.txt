@@ -1,0 +1,76 @@
+==============================================
+           SuppliesPro - CHANGELOG
+        Update History & Release Notes
+==============================================
+
+This file tracks all updates made to the system.
+Record each update with date, changes, and any issues.
+
+
+HOW TO USE
+==========
+1. Updates are recorded automatically by update.bat/update.sh
+2. Manual updates should be documented here
+3. Include: date, changes, issues, rollback notes
+
+
+UPDATE FORMAT
+============
+==============================================
+Update: YYYY-MM-DD HH:MM
+==============================================
+- Description of changes
+- Database backup: backup_YYYYMMDD_HHMM.sqlite3
+- Files modified: list here
+- Issues: any problems encountered
+- Notes: additional information
+
+
+EXAMPLE
+========
+==============================================
+Update: 2024-01-15 14:30
+==============================================
+- Added color field to Supply model
+- Database backed up: backup_pre_update_2024-01-15_14.sqlite3
+- Files modified: inventory/models.py
+- Issues: None
+- Notes: Field added successfully
+
+
+VERSION HISTORY
+===============
+
+--- v1.0 Initial Release ---
+Date: 2024-01-01
+
+Features:
+- Track printer supplies and stock levels
+- Manage printers with IP addresses
+- Install/dispose supplies on printers
+- Record deliveries and update inventory
+- View reports and analytics
+- User management with roles (Admin, Manager, Staff)
+- Database backup and restore
+- Collapsible sidebar menu sections
+- Reports: inventory, replenishment, consumption
+
+Scripts:
+- install.bat / install.sh - Create venv and install dependencies
+- setup.bat / setup.sh - Initialize database
+- start.bat / start.sh - Run development server
+- run_production.bat / run_production.sh - Run production server (Waitress)
+- update.bat / update.sh - Update with automatic backup
+
+Default Login:
+- Username: admin
+- Password: admin123
+
+==============================================
+        For support, contact administrator
+=============================================================================================
+Update: Fri May  1 12:25:33 PM +03 2026
+===============================================
+- Database backed up: backup_pre_update_2026-05-01_1225.sqlite3
+- Migrations applied
+

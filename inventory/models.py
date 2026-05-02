@@ -25,11 +25,14 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ('admin', 'Administrator'),
         ('manager', 'Manager'),
-        ('staff', 'Staff'),
     ]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='staff')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='manager')
+
+    def save(self, *args, **kwargs):
+        if self.is_superuser:
+            self.role = 'admin'
+        super().save(*args, **kwargs)
     phone = models.CharField(max_length=20, blank=True)
-    department = models.CharField(max_length=100, blank=True)
 
     class Meta:
         verbose_name = 'User'
@@ -37,6 +40,66 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_full_name() or self.username
+
+
+class Department(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Department'
+        verbose_name_plural = 'Departments'
+
+    def __str__(self):
+        return self.name
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Location'
+        verbose_name_plural = 'Locations'
+
+    def __str__(self):
+        return self.name
+
+
+class Custodian(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='custodians')
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='custodians')
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    notes = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['last_name', 'first_name']
+        constraints = [
+            models.UniqueConstraint(fields=['first_name', 'last_name'], name='unique_custodian')
+        ]
+        verbose_name = 'Custodian'
+        verbose_name_plural = 'Custodians'
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Supplier(models.Model):
@@ -51,13 +114,16 @@ class Supplier(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_supplier')
+        ]
 
     def __str__(self):
         return self.name
 
 
 class SupplyType(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -76,9 +142,15 @@ class PrinterModel(models.Model):
     name = models.CharField(max_length=200)
     manufacturer = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['manufacturer', 'name']
+        constraints = [
+            models.UniqueConstraint(fields=['manufacturer', 'name'], name='unique_printer_model')
+        ]
+        verbose_name = 'Printer Model'
+        verbose_name_plural = 'Printer Models'
 
     def __str__(self):
         return f"{self.manufacturer} {self.name}"
@@ -91,11 +163,12 @@ class Printer(models.Model):
         ('retired', 'Retired'),
     ]
     name = models.CharField(max_length=200)
-    printer_model = models.ForeignKey(PrinterModel, on_delete=models.PROTECT)
+    printer_model = models.ForeignKey(PrinterModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
     serial_number = models.CharField(max_length=100, unique=True)
-    custodian = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
+    custodian = models.ForeignKey(Custodian, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='printers')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    location = models.CharField(max_length=200)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     image = models.ImageField(upload_to='printers/', blank=True, null=True)
     notes = models.TextField(blank=True)
@@ -104,6 +177,9 @@ class Printer(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_printer')
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.serial_number})"
@@ -226,7 +302,7 @@ class AuditLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.SET_NULL, null=True)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(null=True, blank=True)
     object_repr = models.CharField(max_length=500)
     changes = models.JSONField(default=dict, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)

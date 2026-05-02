@@ -3,4 +3,5 @@ python-decouple
 whitenoise
 Pillow>=10.0
 openpyxl>=3.0
-reportlab>=4.0
+reportlab>=4.5.0
+waitress

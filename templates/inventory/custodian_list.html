@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Custodians – SuppliesPro{% endblock %}
+{% block page_title %}Custodians{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Custodians</h2>
+        <p>Manage personnel responsible for printers and equipment</p>
+    </div>
+    <a href="{% url 'custodian_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Custodian
+    </a>
+</div>
+
+<form method="get" class="filter-bar">
+    <div class="filter-group" style="flex:1;">
+        <label>Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Name, email…" value="{{ request.GET.q }}">
+    </div>
+    <div class="filter-group">
+        <label>Department</label>
+        <select name="department" class="form-select no-select2">
+            <option value="">All</option>
+            {% for dept in departments %}
+            <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"i" %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Location</label>
+        <select name="location" class="form-select no-select2">
+            <option value="">All</option>
+            {% for loc in locations %}
+            <option value="{{ loc.id }}" {% if request.GET.location == loc.id|stringformat:"i" %}selected{% endif %}>{{ loc.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-select no-select2">
+            <option value="active" {% if request.GET.status != 'all' %}selected{% endif %}>Active</option>
+            <option value="all" {% if request.GET.status == 'all' %}selected{% endif %}>All</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left:24px;">Custodian</th>
+                <th>Department</th>
+                <th>Location</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th class="text-end" style="padding-right:24px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for custodian in custodians %}
+            <tr class="{% if not custodian.is_active %}table-secondary opacity-50{% endif %}">
+                <td style="padding-left:24px;">
+                    <a href="{% url 'custodian_detail' custodian.pk %}" style="font-weight:600; color:var(--text-1);">{{ custodian.full_name }}</a>
+                    <div style="font-size:.75rem; color:var(--text-3);">Updated {{ custodian.updated_at|date:"M d, Y" }}</div>
+                </td>
+                <td>{{ custodian.department.name|default:"—" }}</td>
+                <td>{{ custodian.location.name|default:"—" }}</td>
+                <td>{{ custodian.email|default:"—" }}</td>
+                <td>{{ custodian.phone|default:"—" }}</td>
+                <td style="text-align:right; padding-right:24px;">
+                    <a href="{% url 'custodian_update' custodian.pk %}" class="btn btn-ghost btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="post" action="{% url 'custodian_toggle' custodian.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if custodian.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{{ custodian.is_active|yesno:'Disable,Enable' }}">
+                            <i class="bi bi-{{ custodian.is_active|yesno:'toggle-on,toggle-off' }}"></i>
+                        </button>
+                    </form>
+                    <a href="{% url 'custodian_delete' custodian.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-people"></i></div>
+                        <h5>No custodians found</h5>
+                        <p>Try adjusting your filters or add the first custodian.</p>
+                        <a href="{% url 'custodian_create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Add Custodian
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Installations - Printer Supplies{% endblock %}
+{% block page_title %}Installations{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Installations</div>
+    <div class="card-body">
+        <form method="get" class="filter-bar">
+            <div class="filter-group">
+                <label>Printer</label>
+                <select name="printer" class="form-select">
+                    <option value="">All Printers</option>
+                    {% for printer in printers %}
+                    <option value="{{ printer.id }}">{{ printer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="disposed">Disposed</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+
+        {% if installations %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Supply</th>
+                    <th>Printer</th>
+                    <th>Installed By</th>
+                    <th>Installed At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for installation in installations %}
+                <tr>
+                    <td><a href="{% url 'supply_detail' installation.supply.pk %}" style="color: var(--primary); text-decoration: none;">{{ installation.supply.name }}</a></td>
+                    <td>
+                        <a href="{% url 'printer_detail' installation.printer.pk %}" style="color: var(--primary); text-decoration: none;">{{ installation.printer.name }}</a>
+                    </td>
+                    <td>{{ installation.installed_by.username }}</td>
+                    <td>{{ installation.installed_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if installation.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-muted">Disposed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if installation.is_active %}
+                        <form method="post" action="{% url 'installation_dispose' installation.pk %}" class="confirm-form d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-warning">Dispose</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-tools"></i>
+            <h3>No installations found</h3>
+            <p>Install supplies in printers to track them here</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

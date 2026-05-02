@@ -8,38 +8,36 @@
         <h2>Printers</h2>
         <p>Track hardware devices and custodian assignments</p>
     </div>
-    {% if user.role != 'staff' %}
     <a href="{% url 'printer_create' %}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> New Printer
     </a>
-    {% endif %}
 </div>
 
 <form method="get" class="filter-bar">
-        <div class="filter-group" style="flex:1;">
-            <label>Search</label>
-            <input type="text" name="q" class="form-control" placeholder="Name or serial…" value="{{ request.GET.q }}">
-        </div>
-        <div class="filter-group">
-            <label>Status</label>
-            <select name="status" class="form-select no-select2">
-                <option value="">All</option>
-                <option value="active"      {% if request.GET.status == 'active'      %}selected{% endif %}>Active</option>
-                <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>Maintenance</option>
-                <option value="retired"     {% if request.GET.status == 'retired'     %}selected{% endif %}>Retired</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label>Custodian</label>
-            <select name="custodian" class="form-select no-select2">
-                <option value="">All</option>
-                {% for u in users %}
-                <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
+    <div class="filter-group" style="flex:1;">
+        <label>Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Name or serial…" value="{{ request.GET.q }}">
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-select no-select2">
+            <option value="">All</option>
+            <option value="active"      {% if request.GET.status == 'active'      %}selected{% endif %}>Active</option>
+            <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>Maintenance</option>
+            <option value="retired"     {% if request.GET.status == 'retired'     %}selected{% endif %}>Retired</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Custodian</label>
+        <select name="custodian" class="form-select no-select2">
+            <option value="">All</option>
+            {% for c in custodians %}
+            <option value="{{ c.id }}">{{ c.full_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
 
 <!-- Table -->
 <div class="table-wrapper">
@@ -78,8 +76,16 @@
                 </td>
                 <td style="color:var(--text-2);">{{ printer.printer_model }}</td>
                 <td><code>{{ printer.serial_number }}</code></td>
-                <td style="color:var(--text-2);">{{ printer.custodian.get_full_name|default:printer.custodian.username|default:"—" }}</td>
-                <td style="color:var(--text-2);">{{ printer.location }}</td>
+                <td style="color:var(--text-2);">
+                    {% if printer.custodian %}
+                        {{ printer.custodian.full_name }}
+                    {% elif printer.department %}
+                        {{ printer.department.name }} (No custodian)
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td style="color:var(--text-2);">{{ printer.location.name|default:printer.location }}</td>
                 <td>
                     {% if printer.ip_address %}
                     <a href="http://{{ printer.ip_address }}" target="_blank" style="color: var(--primary); text-decoration: none;" title="Open printer management console">
@@ -95,14 +101,12 @@
                     {% else %}<span class="badge badge-muted">Retired</span>{% endif %}
                 </td>
                 <td style="text-align:right; padding-right:24px;">
-                    {% if user.role != 'staff' %}
                     <a href="{% url 'printer_update' printer.pk %}" class="btn btn-ghost btn-sm" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a href="{% url 'printer_delete' printer.pk %}" class="btn btn-danger btn-sm ms-1" title="Delete">
                         <i class="bi bi-trash"></i>
                     </a>
-                    {% endif %}
                 </td>
             </tr>
             {% empty %}

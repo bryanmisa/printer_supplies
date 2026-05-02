@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Delivery #{{ delivery.id }}{% endblock %}
+{% block page_title %}Delivery #{{ delivery.id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Delivery Details</div>
+    <div class="card-body">
+        <table class="table table-bordered mb-4" style="--bs-table-color: #fff !important;">
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 150px; color: #fff !important;">Supplier</th>
+                    <td style="color: #fff !important;"><a href="{% url 'supplier_detail' delivery.supplier.pk %}" class="text-decoration-none" style="color: #fff !important;">{{ delivery.supplier.name }}</a></td>
+                </tr>
+                <tr>
+                    <th scope="row" style="color: #fff !important;">Date</th>
+                    <td style="color: #fff !important;">{{ delivery.delivery_date }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" style="color: #fff !important;">Created By</th>
+                    <td style="color: #fff !important;">{{ delivery.created_by.username }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" style="color: #fff !important;">Notes</th>
+                    <td style="color: #fff !important;">{{ delivery.notes|default:"-" }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <h5 class="mb-3" style="color: #fff !important;">Items</h5>
+        <table class="table table-bordered" style="--bs-table-color: #fff !important;">
+            <thead>
+                <tr>
+                    <th style="color: #fff !important;">Supply</th>
+                    <th style="color: #fff !important;">SKU</th>
+                    <th style="color: #fff !important;">Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in delivery.items.all %}
+                <tr>
+                    <td style="color: #fff !important;"><a href="{% url 'supply_detail' item.supply.pk %}" class="text-decoration-none" style="color: #fff !important;">{{ item.supply.name }}</a></td>
+                    <td style="color: #fff !important;">{{ item.supply.sku }}</td>
+                    <td style="color: #fff !important;">{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'delivery_list' %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Replenishment Report - Printer Supplies{% endblock %}
+{% block page_title %}Replenishment Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-arrow-repeat me-2"></i> Replenishment Report</span>
+        <div class="btn-group btn-group-sm">
+            <a href="?format=csv" class="btn btn-outline-secondary">CSV</a>
+            <a href="?format=excel" class="btn btn-outline-secondary">Excel</a>
+            <a href="?format=pdf" class="btn btn-outline-secondary">PDF</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <h5 class="mb-3" style="color: #5ac8fa; font-weight: bold;">Out of Stock - Priority Reorder</h5>
+        {% if out_of_stock %}
+        <table class="table" id="replenishment-table">
+            <thead>
+                <tr>
+                    <th>Supply</th>
+                    <th>SKU</th>
+                    <th>Current Stock</th>
+                    <th>Suggested Qty</th>
+                    <th>Suppliers</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supply in out_of_stock %}
+                <tr>
+                    <td>{{ supply.name }}</td>
+                    <td>{{ supply.sku }}</td>
+                    <td><span class="badge badge-danger">0</span></td>
+                    <td>{{ supply.low_stock_threshold }}</td>
+                    <td>
+                        {% for supplier in supply.suppliers.all %}
+                        <span class="badge badge-secondary">{{ supplier.name }}</span>
+                        {% empty %}<span style="color: var(--text-1);">-</span>{% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--text-1);">No supplies out of stock.</p>
+        {% endif %}
+
+        <hr class="my-4">
+
+        <h5 class="mb-3" style="color: #5ac8fa; font-weight: bold;">Low Stock</h5>
+        {% if low_stock %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Supply</th>
+                    <th>SKU</th>
+                    <th>Current Stock</th>
+                    <th>Suggested Qty</th>
+                    <th>Suppliers</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supply in low_stock %}
+                <tr>
+                    <td>{{ supply.name }}</td>
+                    <td>{{ supply.sku }}</td>
+                    <td><span class="badge badge-warning">{{ supply.current_stock }}</span></td>
+                    <td>{{ supply.low_stock_threshold }}</td>
+                    <td>
+                        {% for supplier in supply.suppliers.all %}
+                        <span class="badge badge-secondary">{{ supplier.name }}</span>
+                        {% empty %}<span style="color: var(--text-1);">-</span>{% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--text-1);">No supplies at low stock.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
