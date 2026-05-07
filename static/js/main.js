@@ -9,6 +9,16 @@ $(document).ready(function () {
         closeOnSelect: false
     });
 
+    // ── Filter Dropdowns Select2 ──────────────────────
+    $('.filter-select').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Select...',
+        allowClear: true,
+        closeOnSelect: true,
+        minimumResultsForSearch: 0
+    });
+
     // Keep search box active after selection
     $('.select2-container').on('select2:select', function (e) {
         const data = e.params.data;

@@ -16,7 +16,7 @@
                 <input type="text" name="q" class="form-control" placeholder="Search users..." value="{{ request.GET.q }}">
             </div>
             <div class="col-md-3">
-                <select name="role" class="form-select">
+                <select name="role" class="form-select filter-select">
                     <option value="">All Roles</option>
                     {% for value, label in roles %}
                     <option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>

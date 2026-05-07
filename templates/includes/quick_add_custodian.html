@@ -24,7 +24,7 @@
                     </div>
                     <div class="mb-3" id="{{ modal_id }}_department_field">
                         <label for="{{ modal_id }}_department" class="form-label" style="color: var(--text-1);">Department</label>
-                        <select name="department" id="{{ modal_id }}_department" class="form-select">
+                        <select name="department" id="{{ modal_id }}_department" class="form-select select2-select">
                             <option value="">-- Select Department --</option>
                             {% for dept in departments %}
                             <option value="{{ dept.id }}">{{ dept.name }}</option>
@@ -33,7 +33,7 @@
                     </div>
                     <div class="mb-3" id="{{ modal_id }}_location_field">
                         <label for="{{ modal_id }}_location" class="form-label" style="color: var(--text-1);">Location</label>
-                        <select name="location" id="{{ modal_id }}_location" class="form-select">
+                        <select name="location" id="{{ modal_id }}_location" class="form-select select2-select">
                             <option value="">-- Select Location --</option>
                             {% for loc in locations %}
                             <option value="{{ loc.id }}">{{ loc.name }}</option>

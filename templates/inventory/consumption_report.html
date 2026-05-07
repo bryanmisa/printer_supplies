@@ -8,14 +8,14 @@
         <i class="bi bi-graph-up me-2"></i> Consumption Report
         <form method="get" class="filter-bar" style="margin-bottom:0;">
             <div class="filter-group">
-                <select name="months" class="form-select no-select2">
+                <select name="months" class="form-select filter-select">
                     <option value="3" {% if months == 3 %}selected{% endif %}>Last 3 Months</option>
                     <option value="6" {% if months == 6 %}selected{% endif %}>Last 6 Months</option>
                     <option value="12" {% if months == 12 %}selected{% endif %}>Last 12 Months</option>
                 </select>
             </div>
             <div class="filter-group">
-                <select name="custodian" class="form-select no-select2">
+                <select name="custodian" class="form-select filter-select">
                     <option value="">All Custodians</option>
                     {% for user in custodians %}
                     <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>

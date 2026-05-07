@@ -20,7 +20,7 @@
     </div>
     <div class="filter-group">
         <label>Manufacturer</label>
-        <select name="manufacturer" class="form-select no-select2">
+        <select name="manufacturer" class="form-select filter-select">
             <option value="">All</option>
             {% for m in manufacturers %}
             <option value="{{ m }}" {% if request.GET.manufacturer == m %}selected{% endif %}>{{ m }}</option>
@@ -29,7 +29,7 @@
     </div>
     <div class="filter-group">
         <label>Status</label>
-        <select name="status" class="form-select no-select2">
+        <select name="status" class="form-select filter-select">
             <option value="active" {% if request.GET.status != 'all' %}selected{% endif %}>Active</option>
             <option value="all" {% if request.GET.status == 'all' %}selected{% endif %}>All</option>
         </select>
@@ -89,4 +89,25 @@
         </tbody>
     </table>
 </div>
+
+{% if page_obj.has_other_pages %}
+<nav class="d-flex justify-content-center mt-4">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+        </li>
+        {% endif %}
+        <li class="page-item active">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
 {% endblock %}

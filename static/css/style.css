@@ -521,6 +521,20 @@ main { padding: 28px 32px; }
 .btn-sm { padding: 6px 14px; font-size: .8rem; }
 .btn-lg { padding: 13px 28px; font-size: 1rem; }
 
+.btn-outline-primary {
+  background: transparent;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
 /* ── Tables ─────────────────────────────────────────────── */
 .table-wrapper {
   background: var(--surface);
@@ -1268,3 +1282,37 @@ code {
 }
 
 .sidebar-overlay.show { display: block; }
+
+/* ── Pagination ─────────────────────────────────────────── */
+.pagination {
+  gap: 4px;
+  margin: 0;
+}
+
+.page-link {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-1) !important;
+  padding: 8px 14px !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s;
+}
+
+.page-link:hover {
+  background: var(--surface-3) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+.page-item.active .page-link {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+}
+
+.page-item.disabled .page-link {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

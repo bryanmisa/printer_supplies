@@ -9,7 +9,7 @@
         <form method="get" class="filter-bar">
             <div class="filter-group">
                 <label>Printer</label>
-                <select name="printer" class="form-select no-select2">
+                <select name="printer" class="form-select filter-select">
                     <option value="">All Printers</option>
                     {% for printer in printers %}
                     <option value="{{ printer.id }}">{{ printer.name }}</option>
@@ -18,7 +18,7 @@
             </div>
             <div class="filter-group">
                 <label>Status</label>
-                <select name="status" class="form-select no-select2">
+                <select name="status" class="form-select filter-select">
                     <option value="">All Status</option>
                     <option value="active">Active</option>
                     <option value="disposed">Disposed</option>
@@ -67,6 +67,27 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.printer %}&printer={{ request.GET.printer }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.printer %}&printer={{ request.GET.printer }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
         {% else %}
         <div class="empty-state">
             <i class="bi bi-tools"></i>

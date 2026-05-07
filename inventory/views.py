@@ -139,11 +139,17 @@ class SupplyListView(LoginRequiredMixin, ListView):
     context_object_name = 'supplies'
 
     def get_queryset(self):
-        queryset = Supply.objects.filter(is_active=True).order_by('name')
+        queryset = Supply.objects.all().order_by('name')
         query = self.request.GET.get('q')
         status = self.request.GET.get('status')
         printer_model = self.request.GET.get('printer_model')
         supplier = self.request.GET.get('supplier')
+        is_active = self.request.GET.get('is_active')
+
+        if is_active == 'active':
+            queryset = queryset.filter(is_active=True)
+        elif is_active == 'inactive':
+            queryset = queryset.filter(is_active=False)
 
         if query:
             queryset = queryset.filter(
@@ -166,9 +172,9 @@ class SupplyListView(LoginRequiredMixin, ListView):
                     current_stock__gt=models.F('max_stock_threshold')
                 )
         if printer_model:
-            queryset = queryset.filter(printer_models_id=printer_model)
+            queryset = queryset.filter(printer_models__id=printer_model)
         if supplier:
-            queryset = queryset.filter(suppliers_id=supplier)
+            queryset = queryset.filter(suppliers__id=supplier)
 
         return queryset.select_related()
 
@@ -2114,13 +2120,17 @@ def api_quick_add(request, model_name):
                 phone=data.get('phone', ''),
                 department_id=data.get('department') or None,
                 location_id=data.get('location') or None,
+                is_active=data.get('is_active', 'true').lower() == 'true'
             )
             return JsonResponse({'success': True, 'id': custodian.id, 'name': str(custodian)})
         
         elif model_name == 'department':
             dept, created = Department.objects.get_or_create(
                 name=data.get('name', ''),
-                defaults={'description': data.get('description', '')}
+                defaults={
+                    'description': data.get('description', ''),
+                    'is_active': data.get('is_active', 'true').lower() == 'true'
+                }
             )
             if not created:
                 return JsonResponse({'success': False, 'error': 'Department already exists'})
@@ -2129,7 +2139,10 @@ def api_quick_add(request, model_name):
         elif model_name == 'location':
             loc, created = Location.objects.get_or_create(
                 name=data.get('name', ''),
-                defaults={'description': data.get('description', '')}
+                defaults={
+                    'description': data.get('description', ''),
+                    'is_active': data.get('is_active', 'true').lower() == 'true'
+                }
             )
             if not created:
                 return JsonResponse({'success': False, 'error': 'Location already exists'})
@@ -2142,13 +2155,17 @@ def api_quick_add(request, model_name):
                 email=data.get('email', ''),
                 phone=data.get('phone', ''),
                 address=data.get('address', ''),
+                is_active=data.get('is_active', 'true').lower() == 'true'
             )
             return JsonResponse({'success': True, 'id': supplier.id, 'name': supplier.name})
         
         elif model_name == 'supplytype':
             supply_type, created = SupplyType.objects.get_or_create(
                 name=data.get('name', ''),
-                defaults={'description': data.get('description', '')}
+                defaults={
+                    'description': data.get('description', ''),
+                    'is_active': data.get('is_active', 'true').lower() == 'true'
+                }
             )
             if not created:
                 return JsonResponse({'success': False, 'error': 'Supply type already exists'})
@@ -2158,7 +2175,10 @@ def api_quick_add(request, model_name):
             model, created = PrinterModel.objects.get_or_create(
                 name=data.get('name', ''),
                 manufacturer=data.get('manufacturer', ''),
-                defaults={'description': data.get('description', '')}
+                defaults={
+                    'description': data.get('description', ''),
+                    'is_active': data.get('is_active', 'true').lower() == 'true'
+                }
             )
             if not created:
                 return JsonResponse({'success': False, 'error': 'Printer model already exists'})
